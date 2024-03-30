@@ -109,3 +109,9 @@ venv.bak/
 *.tar
 *.fasta
 *.c
+simple_dataset/
+.vscode
+*.so
+__pycache__
+build/
+model_files/*
