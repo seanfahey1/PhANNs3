@@ -115,3 +115,4 @@ simple_dataset/
 __pycache__
 build/
 model_files/*
+*.csv

@@ -19,15 +19,19 @@ def load_stored_model(name: str):
     with open(saved_model_dir / "arrays/arr.parquet", 'rb') as file:
         parquet_table = pq.read_table(file)
         mean_arr = np.array(parquet_table['mean'])
-        std_arr =np.array(parquet_table['std'])
+        std_arr = np.array(parquet_table['std'])
+
+    with open(saved_model_dir / "arrays/class_names_arr.parquet", 'rb') as file:
+        parquet_table = pq.read_table(file)
+        sorted_group_names = list(np.array(parquet_table['sorted_group_names']))
 
     models_dir = saved_model_dir / "model_files/"
     model_paths = [str(x.absolute) for x in models_dir.glob("*.keras")]
 
-    return model_paths, mean_arr, std_arr
+    return model_paths, mean_arr, std_arr, sorted_group_names
 
 
-def store_newly_generated_model(name: str, std_arr: np.array, mean_arr: np.array):
+def store_newly_generated_model(name: str, std_arr: np.array, mean_arr: np.array, sorted_group_names: list):
     saved_model_dir = get_model_dir(name)
     array_dir = saved_model_dir / 'arrays'
     model_dir = saved_model_dir / 'model_files'
@@ -37,11 +41,17 @@ def store_newly_generated_model(name: str, std_arr: np.array, mean_arr: np.array
     parquet_table = pa.table(
         {
             "std": std_arr,
-            "mean": mean_arr
+            "mean": mean_arr,
+        }
+    )
+    group_names_table = pa.table(
+        {
+            "sorted_group_names": np.array(sorted_group_names)
         }
     )
 
     pq.write_table(parquet_table, array_dir / "arr.parquet")
+    pq.write_table(group_names_table, array_dir / "class_names_arr.parquet")
 
     pass
 

@@ -28,7 +28,9 @@ def load_dataset(fasta_dir):
     group_names = set()
     for file in fastas:
         group_names.add(re.match(re_pattern, file.stem).group('name'))
-    class_number_assignments = {x: i for i, x in enumerate(sorted(list(group_names)))}
+    sorted_group_names = sorted(list(group_names))
+
+    class_number_assignments = {x: i for i, x in enumerate(sorted_group_names)}
 
     # init Data object
     num_proteins = fasta_count(fastas)
@@ -61,7 +63,7 @@ def load_dataset(fasta_dir):
 
     mean_array, stdev_array, zscore_array = calc.zscore(data.arr)
 
-    return mean_array, stdev_array, zscore_array, group_arr, class_arr
+    return mean_array, stdev_array, zscore_array, group_arr, class_arr, sorted_group_names
 
 
 def train_new_model(

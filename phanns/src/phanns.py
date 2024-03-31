@@ -59,6 +59,13 @@ def get_classify_args():
         required=True,
         help="Name of the stored model.",
     )
+    parser.add_argument(
+        "-o",
+        "--output_file",
+        required=False,
+        default="./output.csv",
+        help="Relative path of the output csv file."
+    )
     args, _ = parser.parse_known_args()
     return args
 
@@ -70,8 +77,8 @@ def rm():
 
 def train():
     train_args = get_train_args()
-    mean_array, stdev_array, zscore_array, group_arr, class_arr = train_custom_model.load_dataset(train_args.fasta_dir)
-    store_newly_generated_model(train_args.model_name, stdev_array, mean_array)
+    mean_array, stdev_array, zscore_array, group_arr, class_arr, sorted_group_names = train_custom_model.load_dataset(train_args.fasta_dir)
+    store_newly_generated_model(train_args.model_name, stdev_array, mean_array, sorted_group_names)
 
     train_custom_model.train_new_model(
         train_args.model_name,
@@ -85,14 +92,18 @@ def train():
 
 def classify():
     classify_args = get_classify_args()
-    _, mean_arr, std_arr = load_stored_model(classify_args.model_name)
+    _, mean_arr, std_arr, sorted_group_names = load_stored_model(classify_args.model_name)
 
-    zscore_array = predict.load_dataset(classify_args.fasta, mean_arr, std_arr)
+    zscore_array, fasta_headers = predict.load_dataset(classify_args.fasta, mean_arr, std_arr)
     prediction_scores, prediction = predict.predict(classify_args.model_name, zscore_array)
-    print()
+
+    class_number_assignments = {i: x for i, x in enumerate(sorted_group_names)}
+
+    predicted_class = [class_number_assignments[x] for x in prediction]
+    predict.write_prediction_outputs(classify_args.output_file, prediction_scores, predicted_class, fasta_headers, sorted_group_names)
 
 
-if __name__ == '__main__':
+def main():
     if len(sys.argv) < 2:
         print("""
 Welcome to PhANNs. Please select a PhANNs utility to execute.
@@ -110,3 +121,7 @@ Options:
         globals()[sys.argv[1]]()
 
     print()
+
+
+if __name__ == '__main__':
+    sys.exit(main())
