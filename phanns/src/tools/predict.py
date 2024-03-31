@@ -1,16 +1,17 @@
+import re
+import sys
 from pathlib import Path
-from utils.data_handler import Data, fasta_count
 
 import numpy as np
-import re
 from Bio import SeqIO
 from tqdm import tqdm
-import sys
+from utils.data_handler import Data, fasta_count
+
 sys.path.append("..")
 
+from tensorflow.keras.models import load_model
 from utils import stored_models
 from utils.data_handler import Data, fasta_count
-from tensorflow.keras.models import load_model
 
 
 def load_dataset(fasta_path, mean_arr, std_arr):
@@ -75,10 +76,14 @@ def predict(model_name, test_X):
     return predicted_Y, predicted_Y_index
 
 
-def write_prediction_outputs(output_file, predicted_Y, predicted_class, fasta_headers, sorted_group_names):
+def write_prediction_outputs(
+    output_file, predicted_Y, predicted_class, fasta_headers, sorted_group_names
+):
     out_data = zip(fasta_headers, predicted_Y, predicted_class)
-    with open(output_file, 'w') as out:
+    with open(output_file, "w") as out:
         out.write(f"header,{','.join(sorted_group_names)},prediction\n")
         for line in out_data:
-            out.write(f"{line[0]},{','.join(['{:.4f}'.format(x) for x in line[1]])},line[2]")
+            out.write(
+                f"{line[0]},{','.join(['{:.4f}'.format(x) for x in line[1]])},line[2]"
+            )
         print(predicted_Y)

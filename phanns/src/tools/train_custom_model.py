@@ -1,22 +1,20 @@
-
-from pathlib import Path
-from Bio import SeqIO
-import sys
 import re
+import sys
+from pathlib import Path
+
 import numpy as np
+from Bio import SeqIO
 from tqdm import tqdm
 
 sys.path.append("..")
-from utils.data_handler import Data, fasta_count
-from utils import calc, stored_models
-
+from sklearn.utils.class_weight import compute_class_weight
 from tensorflow.keras import backend as K
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.optimizers import Adam
-
-from sklearn.utils.class_weight import compute_class_weight
+from utils import calc, stored_models
+from utils.data_handler import Data, fasta_count
 
 
 def load_dataset(fasta_dir):
@@ -24,10 +22,10 @@ def load_dataset(fasta_dir):
     fastas = list(Path(fasta_dir).glob("*.fasta"))
 
     # assign a numeric code to each base file name
-    re_pattern = r'(?P<prefix>\d+)_(?P<name>.*)'
+    re_pattern = r"(?P<prefix>\d+)_(?P<name>.*)"
     group_names = set()
     for file in fastas:
-        group_names.add(re.match(re_pattern, file.stem).group('name'))
+        group_names.add(re.match(re_pattern, file.stem).group("name"))
     sorted_group_names = sorted(list(group_names))
 
     class_number_assignments = {x: i for i, x in enumerate(sorted_group_names)}
@@ -43,8 +41,8 @@ def load_dataset(fasta_dir):
 
     for file_path in fastas:
         match = re.search(re_pattern, file_path.stem)
-        cls = match.group('name')
-        group_number = match.group('prefix')
+        cls = match.group("name")
+        group_number = match.group("prefix")
         cls_number = class_number_assignments[cls]
 
         print(file_path)
@@ -63,15 +61,17 @@ def load_dataset(fasta_dir):
 
     mean_array, stdev_array, zscore_array = calc.zscore(data.arr)
 
-    return mean_array, stdev_array, zscore_array, group_arr, class_arr, sorted_group_names
-
-
-def train_new_model(
-        name,
-        class_arr,
+    return (
+        mean_array,
+        stdev_array,
+        zscore_array,
         group_arr,
-        zscore_array
-        ):
+        class_arr,
+        sorted_group_names,
+    )
+
+
+def train_new_model(name, class_arr, group_arr, zscore_array):
     for model_number in range(1, 11):
         print(model_number)
         train_X = zscore_array[(group_arr != model_number) & (group_arr != 11)]
@@ -93,7 +93,12 @@ def train_new_model(
             monitor="loss", mode="min", verbose=2, patience=5, min_delta=0.02
         )
 
-        val_model_path = str((stored_models.get_model_dir(name) / f'model_files/val_{"{:02d}".format(model_number)}.keras').resolve())
+        val_model_path = str(
+            (
+                stored_models.get_model_dir(name)
+                / f'model_files/val_{"{:02d}".format(model_number)}.keras'
+            ).resolve()
+        )
 
         mc = ModelCheckpoint(
             val_model_path,
@@ -103,7 +108,12 @@ def train_new_model(
             verbose=1,
         )
 
-        acc_model_path = str((stored_models.get_model_dir(name) / f'model_files/acc_{"{:02d}".format(model_number)}.keras').resolve())
+        acc_model_path = str(
+            (
+                stored_models.get_model_dir(name)
+                / f'model_files/acc_{"{:02d}".format(model_number)}.keras'
+            ).resolve()
+        )
 
         mc2 = ModelCheckpoint(
             acc_model_path,
@@ -120,7 +130,9 @@ def train_new_model(
         train_weights = dict(zip(range(num_classes), class_weights))
 
         model = Sequential()
-        opt = Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, decay=0.0, amsgrad=False)
+        opt = Adam(
+            learning_rate=0.001, beta_1=0.9, beta_2=0.999, decay=0.0, amsgrad=False
+        )
 
         model.add(
             Dense(
@@ -151,19 +163,24 @@ def train_new_model(
             callbacks=[es, mc, mc2],
         )
 
-        test_Y_prediction_values=model.predict(test_X) 
-        test_Y_predicted=np.argmax(test_Y_prediction_values,axis=1)
+        test_Y_prediction_values = model.predict(test_X)
+        test_Y_predicted = np.argmax(test_Y_prediction_values, axis=1)
 
-        model_path = str((stored_models.get_model_dir(name) / f'model_files/{"{:02d}".format(model_number)}.keras').resolve())
+        model_path = str(
+            (
+                stored_models.get_model_dir(name)
+                / f'model_files/{"{:02d}".format(model_number)}.keras'
+            ).resolve()
+        )
         model.save(model_path)
 
         model_val = load_model(val_model_path)
-        test_Y_prediction_values_val=model.predict(test_X) 
-        test_Y_predicted_val=np.argmax(test_Y_prediction_values_val,axis=1)
+        test_Y_prediction_values_val = model.predict(test_X)
+        test_Y_predicted_val = np.argmax(test_Y_prediction_values_val, axis=1)
 
         model_acc = load_model(acc_model_path)
-        test_Y_prediction_values_acc=model.predict(test_X) 
-        test_Y_predicted_acc=np.argmax(test_Y_prediction_values_acc,axis=1)
+        test_Y_prediction_values_acc = model.predict(test_X)
+        test_Y_predicted_acc = np.argmax(test_Y_prediction_values_acc, axis=1)
 
         K.clear_session()
 

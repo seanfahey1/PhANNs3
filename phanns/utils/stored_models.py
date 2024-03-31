@@ -1,10 +1,11 @@
-from pathlib import Path
-import pyarrow as pa
-import pyarrow.parquet as pq
-import numpy as np
 import shutil
 from datetime import datetime
+from pathlib import Path
 from shutil import rmtree
+
+import numpy as np
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 
 def get_model_dir(name):
@@ -16,14 +17,14 @@ def get_model_dir(name):
 def load_stored_model(name: str):
     saved_model_dir = get_model_dir(name)
 
-    with open(saved_model_dir / "arrays/arr.parquet", 'rb') as file:
+    with open(saved_model_dir / "arrays/arr.parquet", "rb") as file:
         parquet_table = pq.read_table(file)
-        mean_arr = np.array(parquet_table['mean'])
-        std_arr = np.array(parquet_table['std'])
+        mean_arr = np.array(parquet_table["mean"])
+        std_arr = np.array(parquet_table["std"])
 
-    with open(saved_model_dir / "arrays/class_names_arr.parquet", 'rb') as file:
+    with open(saved_model_dir / "arrays/class_names_arr.parquet", "rb") as file:
         parquet_table = pq.read_table(file)
-        sorted_group_names = list(np.array(parquet_table['sorted_group_names']))
+        sorted_group_names = list(np.array(parquet_table["sorted_group_names"]))
 
     models_dir = saved_model_dir / "model_files/"
     model_paths = [str(x.absolute) for x in models_dir.glob("*.keras")]
@@ -31,10 +32,12 @@ def load_stored_model(name: str):
     return model_paths, mean_arr, std_arr, sorted_group_names
 
 
-def store_newly_generated_model(name: str, std_arr: np.array, mean_arr: np.array, sorted_group_names: list):
+def store_newly_generated_model(
+    name: str, std_arr: np.array, mean_arr: np.array, sorted_group_names: list
+):
     saved_model_dir = get_model_dir(name)
-    array_dir = saved_model_dir / 'arrays'
-    model_dir = saved_model_dir / 'model_files'
+    array_dir = saved_model_dir / "arrays"
+    model_dir = saved_model_dir / "model_files"
     array_dir.mkdir(exist_ok=True, parents=True)
     model_dir.mkdir(exist_ok=True, parents=True)
 
@@ -44,11 +47,7 @@ def store_newly_generated_model(name: str, std_arr: np.array, mean_arr: np.array
             "mean": mean_arr,
         }
     )
-    group_names_table = pa.table(
-        {
-            "sorted_group_names": np.array(sorted_group_names)
-        }
-    )
+    group_names_table = pa.table({"sorted_group_names": np.array(sorted_group_names)})
 
     pq.write_table(parquet_table, array_dir / "arr.parquet")
     pq.write_table(group_names_table, array_dir / "class_names_arr.parquet")

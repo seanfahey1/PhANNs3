@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-import numpy as np
 import itertools
-from Bio.SeqUtils.ProtParam import ProteinAnalysis
-from Bio import SeqIO
 import sys
+
+import numpy as np
+from Bio import SeqIO
+from Bio.SeqUtils.ProtParam import ProteinAnalysis
 
 sys.path.append("..")
 from utils import count
@@ -42,19 +43,23 @@ class Data:
         len_seq = len(sequence)
         sequence_sc = sequence.translate(self.sc_translator)
 
-        di_pep_count = count.calculate_frequencies(sequence, self.di_pep, len_seq-1)
+        di_pep_count = count.calculate_frequencies(sequence, self.di_pep, len_seq - 1)
         di_pep_count_n = np.asarray(di_pep_count, dtype=np.float64)
 
-        tri_pep_count = count.calculate_frequencies(sequence, self.tri_pep, len_seq-2)
+        tri_pep_count = count.calculate_frequencies(sequence, self.tri_pep, len_seq - 2)
         tri_pep_count_n = np.asarray(tri_pep_count, dtype=np.float64)
 
-        di_sc_count = count.calculate_frequencies(sequence, self.di_sc, len_seq-1)
+        di_sc_count = count.calculate_frequencies(sequence, self.di_sc, len_seq - 1)
         di_sc_count_n = np.asarray(di_sc_count, dtype=np.float64)
 
-        tri_sc_count = count.calculate_frequencies(sequence_sc, self.tri_sc, len_seq-2)
+        tri_sc_count = count.calculate_frequencies(
+            sequence_sc, self.tri_sc, len_seq - 2
+        )
         tri_sc_count_n = np.asarray(tri_sc_count, dtype=np.float64)
 
-        tetra_sc_count = count.calculate_frequencies(sequence_sc, self.tetra_sc, len_seq-3)
+        tetra_sc_count = count.calculate_frequencies(
+            sequence_sc, self.tetra_sc, len_seq - 3
+        )
         tetra_sc_count_n = np.asarray(tetra_sc_count, dtype=np.float64)
 
         X = ProteinAnalysis(sequence)
