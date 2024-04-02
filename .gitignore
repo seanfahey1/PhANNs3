@@ -114,5 +114,5 @@ simple_dataset/
 *.so
 __pycache__
 build/
-model_files/*
+model_files/
 *.csv
