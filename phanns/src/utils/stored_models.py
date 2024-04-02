@@ -66,11 +66,14 @@ def store_model_from_disk(name, model_dir):
 def list_models():
     models_dir = Path(__file__).parent.parent.parent / f"model_files/"
     available_models = [x for x in models_dir.glob("*/")]
-    for model in available_models:
-        timestamp = str(datetime.fromtimestamp(model.stat().st_mtime))
-        print(f"model name: {model.stem: <20}last edited: {timestamp}")
+    if len(available_models) == 0:
+        print("No models are currently saved.")
+    else:
+        for model in available_models:
+            timestamp = str(datetime.fromtimestamp(model.stat().st_mtime))
+            print(f"model name: {model.stem: <20}last edited: {timestamp}")
 
 
 def remove_model(name):
-    model_dir = str(get_model_dir(name).absolute)
+    model_dir = str(get_model_dir(name).absolute())
     rmtree(model_dir)

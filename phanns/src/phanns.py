@@ -11,7 +11,16 @@ from utils.stored_models import (list_models, load_stored_model, remove_model,
 # fmt: on
 
 
-def get_store_model_args():
+def get_export_args():
+    parser = argparse.ArgumentParser(description="Export a pre-stored model.")
+    parser.add_argument(
+        "-n",
+        "--model_name",
+        required=True,
+        help="Name of the stored model to be exported.",
+    )
+    args, _ = parser.parse_known_args()
+    return args
     pass
 
 
@@ -77,6 +86,11 @@ def get_classify_args():
 def rm():
     rm_args = get_rm_model_args()
     remove_model(rm_args.model_name)
+
+
+def export():
+    export_args = get_export_args()
+    # TODO: function to
 
 
 def train():

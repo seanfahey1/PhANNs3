@@ -8,6 +8,7 @@ from tqdm import tqdm
 
 sys.path.append("..")
 from sklearn.utils.class_weight import compute_class_weight
+from tensorflow.keras import Input
 from tensorflow.keras import backend as K
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.layers import Dense, Dropout
@@ -130,14 +131,11 @@ def train_new_model(name, class_arr, group_arr, zscore_array):
         train_weights = dict(zip(range(num_classes), class_weights))
 
         model = Sequential()
-        opt = Adam(
-            learning_rate=0.001, beta_1=0.9, beta_2=0.999, decay=0.0, amsgrad=False
-        )
-
+        opt = Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False)
+        model.add(Input(shape=(feature_count,)))
         model.add(
             Dense(
                 feature_count,
-                input_dim=feature_count,
                 kernel_initializer="random_uniform",
                 activation="relu",
             )

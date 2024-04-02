@@ -83,6 +83,6 @@ def write_prediction_outputs(
         out.write(f"header,{','.join(sorted_group_names)},prediction\n")
         for line in out_data:
             out.write(
-                f"{line[0]},{','.join(['{:.4f}'.format(x) for x in line[1]])},line[2]"
+                f"{line[0]},{','.join(['{:.4f}'.format(x) for x in line[1]])},{line[2]}\n"
             )
         print(predicted_Y)

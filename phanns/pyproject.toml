@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools >= 61.0"]
+requires = ["setuptools >= 61.0", "wheel", "Cython >= 3.0.0", "numpy >= 1.26.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,8 +7,8 @@ name = "phanns"
 version = "0.0.1"
 description = "Annotate phage structural proteins using a neural network."
 dependencies = [
-    "biopython>=1.81",
-    "numpy>=1.26.2",
+    "biopython>=1.80",
+    "numpy>=1.26.0",
     "tensorflow==2.16.1",
     "pyarrow>=15.0.0",
     "tqdm>=4.66.0",
@@ -40,4 +40,4 @@ classifiers = [
 Repository = "https://github.com/seanfahey1/PhANNs3"
 
 [project.scripts]
-dataset-builder = "phanns:main"
+phanns = "phanns:main"

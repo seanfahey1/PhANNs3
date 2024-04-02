@@ -14,7 +14,8 @@ extensions = [
 ]
 
 setup(
-    packages=find_packages(),
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
     ext_modules=cythonize(extensions),
     include_dirs=[numpy.get_include()],
 )
