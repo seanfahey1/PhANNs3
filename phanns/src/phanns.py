@@ -184,9 +184,6 @@ def classify():
 
 
 # TODO:
-# -function to check a single model and make sure all needed files are present
-#       | call this function on list models and print a corrupted flag if something is wrong
-#       | also call this function on the selected model before starting any step
 # -train and classify steps have warnings printing. Fix these.
 # -
 

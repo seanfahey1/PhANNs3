@@ -1,3 +1,4 @@
+import logging
 import sys
 from pathlib import Path
 
@@ -8,6 +9,7 @@ from utils.data_handler import Data, fasta_count
 
 sys.path.append("..")
 
+from tensorflow.keras.backend import clear_session
 from tensorflow.keras.models import load_model
 from utils import stored_models
 from utils.data_handler import Data, fasta_count
@@ -57,6 +59,7 @@ def z_score_from_pre_calculated(data, stdev_arr, mean_arr):
 
 
 def predict(model_name, test_X):
+    logging.getLogger("tensorflow").setLevel(logging.ERROR)
     y_hats = []
 
     stored_model_dir = stored_models.get_model_dir(model_name) / "model_files/"
@@ -70,6 +73,10 @@ def predict(model_name, test_X):
 
         y_hat = model.predict(test_X, verbose=0)
         y_hats.append(y_hat)
+
+        clear_session()
+        del model
+        del y_hat
 
     predicted_Y = np.sum(y_hats, axis=0)
     predicted_Y_index = np.argmax(predicted_Y, axis=1)
@@ -87,4 +94,4 @@ def write_prediction_outputs(
             out.write(
                 f"{line[0]},{','.join(['{:.4f}'.format(x) for x in line[1]])},{line[2]}\n"
             )
-        print(predicted_Y)
+    print(f"Predictions written to {Path(output_file).absolute()}")
