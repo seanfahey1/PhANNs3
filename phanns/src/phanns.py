@@ -5,23 +5,50 @@ from tools import predict, train_custom_model
 
 # fmt: off
 sys.path.append("..")
-from utils.stored_models import (list_models, load_stored_model, remove_model,
+from utils.stored_models import (export_model, list_models, load_model,
+                                 load_stored_model, remove_model,
                                  store_newly_generated_model)
 
 # fmt: on
 
 
 def get_export_args():
-    parser = argparse.ArgumentParser(description="Export a pre-stored model.")
+    parser = argparse.ArgumentParser(
+        description="Export a pre-stored model. Warning: These files can be VERY large (often > 30Gb)."
+    )
     parser.add_argument(
         "-n",
         "--model_name",
         required=True,
         help="Name of the stored model to be exported.",
     )
+    parser.add_argument(
+        "-o",
+        "--output_file",
+        required=False,
+        default=".",
+        help="Optional directory where the tar file should be written. (default: %(default)s)",
+    )
     args, _ = parser.parse_known_args()
     return args
-    pass
+
+
+def get_load_args():
+    parser = argparse.ArgumentParser(description="Store a pre-trained model.")
+    parser.add_argument(
+        "-n",
+        "--model_name",
+        required=True,
+        help="Name of the stored model to be exported.",
+    )
+    parser.add_argument(
+        "-i",
+        "--input_file",
+        required=True,
+        help="Path to the .tar.gz model file to load.",
+    )
+    args, _ = parser.parse_known_args()
+    return args
 
 
 def get_rm_model_args():
@@ -77,7 +104,7 @@ def get_classify_args():
         "--output_file",
         required=False,
         default="./output.csv",
-        help="Relative path of the output csv file.",
+        help="Optional relative path of the output csv file. (default: %(default)s)",
     )
     args, _ = parser.parse_known_args()
     return args
@@ -85,16 +112,25 @@ def get_classify_args():
 
 def rm():
     rm_args = get_rm_model_args()
+    print("Starting model removal step.")
     remove_model(rm_args.model_name)
 
 
 def export():
     export_args = get_export_args()
-    # TODO: function to
+    print("Starting model export step.")
+    export_model(export_args.model_name, export_args.output_file)
+
+
+def load():
+    load_args = get_load_args()
+    print("Starting model loading step.")
+    load_model(load_args.model_name, load_args.input_file)
 
 
 def train():
     train_args = get_train_args()
+    print("Starting model training step.")
     (
         mean_array,
         stdev_array,
@@ -118,6 +154,7 @@ def train():
 
 def classify():
     classify_args = get_classify_args()
+    print("Starting prediction step")
     _, mean_arr, std_arr, sorted_group_names = load_stored_model(
         classify_args.model_name
     )
@@ -141,6 +178,14 @@ def classify():
     )
 
 
+# TODO:
+# -function to check a single model and make sure all needed files are present
+#       | call this function on list models and print a corrupted flag if something is wrong
+#       | also call this function on the selected model before starting any step
+# -train and classify steps have warnings printing. Fix these.
+# -
+
+
 def main():
     if len(sys.argv) < 2:
         print(
@@ -148,19 +193,30 @@ def main():
 Welcome to PhANNs. Please select a PhANNs utility to execute.
 Options:
 
+    `phanns list_models` to view a list of available models
     `phanns train` to train a new PhANNs model from a prepared dataset
     `phanns load` to save a pre-trained PhANNs model (.tar file) for later use (not yet working)
     `phanns classify` to classify proteins in a fasta file using a pre-loaded PhANNs model
-    `phanns list_models` to view a list of available models
+    `phanns export` to export a model as a .tar.gz file
     `phanns rm` to delete a pre-saved model
     """
         )
         sys.exit()
 
     else:
-        globals()[sys.argv[1]]()
+        try:
+            assert sys.argv[1] in [
+                "list_models",
+                "train",
+                "load",
+                "classify",
+                "export",
+                "rm",
+            ]
+        except AssertionError:
+            raise AttributeError(f"{sys.argv[1]} is not a valid command.")
 
-    print()
+        globals()[sys.argv[1]]()
 
 
 if __name__ == "__main__":

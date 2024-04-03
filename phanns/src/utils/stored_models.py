@@ -1,4 +1,6 @@
+import re
 import shutil
+import tarfile
 from datetime import datetime
 from pathlib import Path
 from shutil import rmtree
@@ -6,12 +8,34 @@ from shutil import rmtree
 import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
+from tqdm import tqdm
 
 
 def get_model_dir(name):
     saved_model_dir = Path(__file__).parent.parent.parent / f"model_files/{name}/"
     saved_model_dir.mkdir(exist_ok=True, parents=True)
     return saved_model_dir
+
+
+def validate_model(model_dir):
+    try:
+        dirs = [x.stem for x in model_dir.glob("*/")]
+        assert "model_files" in dirs
+        assert "arrays" in dirs
+
+        model_files = [x.name for x in model_dir.glob("model_files/*.keras")]
+        for name in [f"{i:02d}.keras" for i in range(1, 11)]:
+            assert name in model_files
+
+        data_files = [x.name for x in model_dir.glob("arrays/*.parquet")]
+        assert "arr.parquet" in data_files
+        assert "class_names_arr.parquet" in data_files
+
+    except AssertionError as e:
+        print(e)
+        return False
+
+    return True
 
 
 def load_stored_model(name: str):
@@ -69,11 +93,57 @@ def list_models():
     if len(available_models) == 0:
         print("No models are currently saved.")
     else:
+        print(f"{'models:': <20}{'time last edited:': <30}{'state'}")
         for model in available_models:
+            valid = validate_model(model)
             timestamp = str(datetime.fromtimestamp(model.stat().st_mtime))
-            print(f"model name: {model.stem: <20}last edited: {timestamp}")
+            if valid:
+                print(f"{model.stem: <20}{timestamp: <30}ready")
+            else:
+                print(f"{model.stem: <20}{timestamp: <30}CORRUPTED!")
 
 
 def remove_model(name):
     model_dir = str(get_model_dir(name).absolute())
     rmtree(model_dir)
+
+
+def export_model(name, output_path):
+    saved_model_dir = get_model_dir(name)
+    model_files = list(
+        (saved_model_dir / "model_files").glob("0*")
+    )  # TODO: test this change!!
+    array_files = list((saved_model_dir / "arrays").glob("*"))
+
+    with tarfile.open(Path(output_path) / f"{name}.tar.gz", "w:gz") as tar:
+        print("Writing model files. This step may take some time.")
+        for file in tqdm(model_files):
+            tar.add(file, arcname=f"model_files/{file.name}")
+        print("Writing data files.")
+        for file in tqdm(array_files):
+            tar.add(file, arcname=f"arrays/{file.name}")
+
+
+def load_model(name, input_file):
+    new_model_dir = get_model_dir(name)
+
+    array_files_dir = new_model_dir / "arrays"
+    model_files_dir = new_model_dir / "model_files"
+
+    array_files_dir.mkdir(exist_ok=True, parents=True)
+    model_files_dir.mkdir(exist_ok=True, parents=True)
+
+    with tarfile.open(input_file) as tar:
+        files = tar.getmembers()
+        for file in files:
+            file_name = file.get_info()["name"]
+
+            if re.match(r"arrays/.*\.parquet", file_name):
+                contents = tar.extractfile(file)
+                with open(array_files_dir / file, "wb") as writer:
+                    writer.write(contents)
+
+            elif re.match(r"model_files/.*\.parquet", file_name):
+                contents = tar.extractfile(file)
+                with open(model_files_dir / file, "wb") as writer:
+                    writer.write(contents)

@@ -107,9 +107,11 @@ venv.bak/
 #
 *.png
 *.tar
+*.tar.gz
 *.fasta
 *.c
 simple_dataset/
+test_dataset/
 .vscode
 *.so
 __pycache__
