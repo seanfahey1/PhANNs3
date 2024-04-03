@@ -183,11 +183,6 @@ def classify():
     )
 
 
-# TODO:
-# -train and classify steps have warnings printing. Fix these.
-# -
-
-
 def main():
     if len(sys.argv) < 2:
         print(

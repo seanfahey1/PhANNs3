@@ -5,7 +5,7 @@ from Cython.Build import cythonize
 from setuptools import Extension, find_packages, setup
 
 # Find all .pyx files in the app directory
-pyx_files = glob.glob("utils/*.pyx", recursive=True)
+pyx_files = glob.glob("src/utils/*.pyx", recursive=True)
 
 # Generate a list of Extension objects from the pyx files
 extensions = [
