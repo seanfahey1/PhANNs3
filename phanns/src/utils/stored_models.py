@@ -11,13 +11,16 @@ import pyarrow.parquet as pq
 from tqdm import tqdm
 
 
-def get_model_dir(name):
+def get_model_dir(name, create=True):
     saved_model_dir = Path(__file__).parent.parent.parent / f"model_files/{name}/"
-    saved_model_dir.mkdir(exist_ok=True, parents=True)
+    if create:
+        saved_model_dir.mkdir(exist_ok=True, parents=True)
+
     return saved_model_dir
 
 
-def validate_model(model_dir):
+def validate_model(name):
+    model_dir = get_model_dir(name, create=False)
     try:
         dirs = [x.stem for x in model_dir.glob("*/")]
         assert "model_files" in dirs
@@ -95,7 +98,7 @@ def list_models():
     else:
         print(f"{'models:': <20}{'time last edited:': <30}{'state'}")
         for model in available_models:
-            valid = validate_model(model)
+            valid = validate_model(model.name)
             timestamp = str(datetime.fromtimestamp(model.stat().st_mtime))
             if valid:
                 print(f"{model.stem: <20}{timestamp: <30}ready")

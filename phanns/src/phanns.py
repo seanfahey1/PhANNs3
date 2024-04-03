@@ -7,7 +7,7 @@ from tools import predict, train_custom_model
 sys.path.append("..")
 from utils.stored_models import (export_model, list_models, load_model,
                                  load_stored_model, remove_model,
-                                 store_newly_generated_model)
+                                 store_newly_generated_model, validate_model)
 
 # fmt: on
 
@@ -154,6 +154,11 @@ def train():
 
 def classify():
     classify_args = get_classify_args()
+    if not validate_model(classify_args.model_name):
+        sys.exit(
+            "Selected model is invalid. Try running `phanns list_models` to check available model."
+        )
+
     print("Starting prediction step")
     _, mean_arr, std_arr, sorted_group_names = load_stored_model(
         classify_args.model_name

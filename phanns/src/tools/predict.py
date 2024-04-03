@@ -44,6 +44,7 @@ def z_score_from_pre_calculated(data, stdev_arr, mean_arr):
     for col_num in range(data.shape[1]):
         stdev_val = stdev_arr[col_num]
         mean_val = mean_arr[col_num]
+
         for row_num in range(data.shape[0]):
             if stdev_val != 0:
                 val = data[row_num, col_num]
@@ -51,6 +52,7 @@ def z_score_from_pre_calculated(data, stdev_arr, mean_arr):
             else:
                 z_val = 0
             data[row_num, col_num] = z_val
+
     return data
 
 
