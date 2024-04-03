@@ -1,3 +1,4 @@
+import logging
 import re
 import sys
 from pathlib import Path
@@ -60,6 +61,7 @@ def load_dataset(fasta_dir):
 
             row_counter += 1
 
+    print("Calculating z-score normalization")
     mean_array, stdev_array, zscore_array = calc.zscore(data.arr)
 
     return (
@@ -73,8 +75,9 @@ def load_dataset(fasta_dir):
 
 
 def train_new_model(name, class_arr, group_arr, zscore_array):
+    print("Starting model training")
     for model_number in range(1, 11):
-        print(model_number)
+        print(f"model {model_number}")
         train_X = zscore_array[(group_arr != model_number) & (group_arr != 11)]
         test_X = zscore_array[group_arr == model_number]
 
@@ -193,12 +196,14 @@ def initial_predict(model_name, zscore_array, group_arr, class_arr):
 
     stored_model_dir = stored_models.get_model_dir(model_name) / "model_files/"
 
-    for model_number in range(1, 11):
+    logging.getLogger("tensorflow").setLevel(logging.ERROR)
+    print("Running initial model testing")
+    for model_number in tqdm(range(1, 11)):
         model_full_name = f"{'{:02d}'.format(model_number)}.keras"
         model_path = stored_model_dir / model_full_name
         model = load_model(model_path)
 
-        y_hat = model.predict(test_X, verbose=2)
+        y_hat = model.predict(test_X, verbose=0)
         y_hats.append(y_hat)
 
     y_hats_array = np.array(y_hats)
