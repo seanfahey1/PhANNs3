@@ -160,7 +160,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array):
             train_X,
             train_Y,
             validation_data=(test_X, test_Y),
-            epochs=120,
+            epochs=1,
             batch_size=5000,
             verbose=2,
             class_weight=train_weights,

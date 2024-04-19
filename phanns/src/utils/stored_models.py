@@ -92,11 +92,15 @@ def store_model_from_disk(name, model_dir):
 
 def list_models():
     models_dir = Path(__file__).parent.parent.parent / f"model_files/"
-    available_models = [x for x in models_dir.glob("*/")]
+    available_models = [
+        x
+        for x in models_dir.glob("*/")
+        if not str(x).endswith("<Sequential name=sequential, built=True>")
+    ]
     if len(available_models) == 0:
         print("No models are currently saved.")
     else:
-        print(f"{'models:': <20}{'time last edited:': <30}{'state'}")
+        print(f"{'models:': <30}{'time last edited:': <30}{'state'}")
         for model in available_models:
             valid = validate_model(model.name)
             timestamp = str(datetime.fromtimestamp(model.stat().st_mtime))
