@@ -6,7 +6,7 @@ from tools import predict, train_custom_model
 # fmt: off
 sys.path.append("..")
 from utils.stored_models import (export_model, list_models, load_model,
-                                 load_stored_model, remove_model,
+                                 load_stored_model, move_model, remove_model,
                                  store_newly_generated_model, validate_model)
 
 # fmt: on
@@ -63,6 +63,24 @@ def get_rm_model_args():
     return args
 
 
+def get_move_model_args():
+    parser = argparse.ArgumentParser(description="Delete a pre-stored model.")
+    parser.add_argument(
+        "-o",
+        "--old_model_name",
+        required=True,
+        help="Name of the stored model to be moved.",
+    )
+    parser.add_argument(
+        "-n",
+        "--new_model_name",
+        required=True,
+        help="New name for the stored model.",
+    )
+    args, _ = parser.parse_known_args()
+    return args
+
+
 def get_train_args():
     parser = argparse.ArgumentParser(
         description="Tests a PhANNs model using pre-loaded test data. Must run load.py step first."
@@ -114,6 +132,12 @@ def rm():
     rm_args = get_rm_model_args()
     print("Starting model removal step.")
     remove_model(rm_args.model_name)
+
+
+def move():
+    move_args = get_move_model_args()
+    print("Starting model removal step.")
+    move_model(move_args.old_model_name, move_args.new_model_name)
 
 
 def export():

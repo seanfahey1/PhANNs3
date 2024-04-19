@@ -115,6 +115,14 @@ def remove_model(name):
     rmtree(model_dir)
 
 
+def move_model(old_name, new_name):
+    model_dir = get_model_dir(old_name)
+    new_model_dir = model_dir.parent / new_name
+
+    new_model_dir.mkdir(parents=True, exist_ok=True)
+    model_dir.rename(new_model_dir)
+
+
 def export_model(name, output_path):
     saved_model_dir = get_model_dir(name)
     model_files = list(
