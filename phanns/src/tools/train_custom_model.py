@@ -21,8 +21,14 @@ from utils.data_handler import Data, fasta_count
 
 
 def load_dataset(fasta_dir):
+    if not Path(fasta_dir).exists():
+        raise ValueError(f"Selected directory ({fasta_dir}) does not exist!")
+
     # collect files
     fastas = list(Path(fasta_dir).glob("*.fasta"))
+
+    if len(fastas) == 0:
+        raise ValueError(f"No .fasta files found at target directory: {fasta_dir}")
 
     # assign a numeric code to each base file name
     re_pattern = r"(?P<prefix>\d+)_(?P<name>.*)"
