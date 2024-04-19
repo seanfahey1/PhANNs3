@@ -244,6 +244,7 @@ Options:
                 "classify",
                 "export",
                 "rm",
+                "move",
             ]
         except AssertionError:
             raise AttributeError(f"{sys.argv[1]} is not a valid command.")
