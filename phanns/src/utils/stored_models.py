@@ -100,7 +100,7 @@ def list_models():
     if len(available_models) == 0:
         print("No models are currently saved.")
     else:
-        print(f"{'models:': <30}{'time last edited:': <30}{'state'}")
+        print(f"{'models:': <40}{'time last edited:': <30}{'state'}")
         for model in available_models:
             valid = validate_model(model.name)
             timestamp = str(datetime.fromtimestamp(model.stat().st_mtime))
