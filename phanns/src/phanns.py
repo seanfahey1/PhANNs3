@@ -136,7 +136,7 @@ def rm():
 
 def move():
     move_args = get_move_model_args()
-    print("Starting model removal step.")
+    print("Starting model moving step.")
     move_model(move_args.old_model_name, move_args.new_model_name)
 
 
