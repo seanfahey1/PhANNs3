@@ -99,11 +99,11 @@ def write_prediction_outputs(
 
 
 def write_initial_prediction_outputs(
-    output_file, predicted_Y, predicted_class, sorted_group_names, class_array
+    output_file, predicted_Y, predicted_class, sorted_group_names, true_class
 ):
-    out_data = zip(class_array, predicted_Y, predicted_class)
+    out_data = zip(true_class, predicted_Y, predicted_class)
     with open(output_file, "w") as out:
-        out.write(f"header,{','.join(sorted_group_names)},prediction\n")
+        out.write(f"true_class,{','.join(sorted_group_names)},prediction\n")
         for line in out_data:
             out.write(
                 f"{line[0]},{','.join(['{:.4f}'.format(x) for x in line[1]])},{line[2]}\n"
