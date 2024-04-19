@@ -105,9 +105,9 @@ def list_models():
             valid = validate_model(model.name)
             timestamp = str(datetime.fromtimestamp(model.stat().st_mtime))
             if valid:
-                print(f"{model.stem: <20}{timestamp: <30}ready")
+                print(f"{model.stem: <40}{timestamp: <30}ready")
             else:
-                print(f"{model.stem: <20}{timestamp: <30}CORRUPTED!")
+                print(f"{model.stem: <40}{timestamp: <30}CORRUPTED!")
 
 
 def remove_model(name):
