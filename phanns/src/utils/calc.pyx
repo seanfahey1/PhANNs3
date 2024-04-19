@@ -1,5 +1,7 @@
 import numpy as np
+
 cimport numpy as np
+
 
 def zscore(np.ndarray[np.float64_t, ndim=2] array):
     """

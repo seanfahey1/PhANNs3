@@ -1,6 +1,7 @@
 # cython: language_level=3
 from libc.string cimport strstr
 
+
 cpdef list calculate_frequencies(str main_string, list substrings, int len_seq):
     cdef list counts = []
     cdef bytes main_str_bytes = main_string.encode('utf-8')

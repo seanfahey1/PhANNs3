@@ -11,6 +11,7 @@ sys.path.append("..")
 from sklearn.utils.class_weight import compute_class_weight
 from tensorflow.keras import Input
 from tensorflow.keras import backend as K
+from tensorflow.keras.backend import clear_session
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.models import Sequential, load_model
@@ -89,9 +90,11 @@ def train_new_model(name, class_arr, group_arr, zscore_array):
         num_classes = len(unique_classes)
 
         # These arrays basically OHE the class to columns. Instead of a bunch of class numbers, we have an array with a
-        # single `1` on each row indicating the class. I subtract 1 from the array to fit into zero indexing.
-        train_Y = np.eye(num_classes)[train_Y_index - 1]
-        test_Y = np.eye(num_classes)[test_Y_index - 1]
+        # single `1` on each row indicating the class.
+        train_Y = np.eye(num_classes)[train_Y_index]
+        test_Y = np.eye(num_classes)[
+            test_Y_index
+        ]  # TODO: check that removing the -1 here fixed the indexing issue.
 
         es = EarlyStopping(
             monitor="loss", mode="min", verbose=2, patience=5, min_delta=0.02
@@ -157,7 +160,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array):
             train_X,
             train_Y,
             validation_data=(test_X, test_Y),
-            epochs=2,
+            epochs=120,
             batch_size=5000,
             verbose=2,
             class_weight=train_weights,
@@ -206,6 +209,11 @@ def initial_predict(model_name, zscore_array, group_arr, class_arr):
         y_hat = model.predict(test_X, verbose=0)
         y_hats.append(y_hat)
 
-    y_hats_array = np.array(y_hats)
+        clear_session()
+        del model
+        del y_hat
 
-    return y_hats_array
+    predicted_Y = np.sum(y_hats, axis=0)
+    predicted_Y_index = np.argmax(predicted_Y, axis=1)
+
+    return predicted_Y, predicted_Y_index
