@@ -112,21 +112,24 @@ def write_initial_prediction_outputs(
 
 
 def confusion_matrix(file_path, true_class, predicted_class):
-    true_classes = {x: i for i, x in enumerate(sorted(list(set(true_class))))}
-    predicted_classes = {x: i for i, x in enumerate(sorted(list(set(predicted_class))))}
+    all_classes = list(set(true_class).union(set(predicted_class)))
+    classes = {x: i for i, x in enumerate(sorted(all_classes))}
 
-    matrix = np.zeros((len(true_classes), len(predicted_classes)))
+    matrix = np.zeros((len(classes), len(classes)))
     for true in true_class:
         for pred in predicted_class:
-            matrix[true_classes[true]][predicted_classes[pred]] += 1
+            matrix[classes[true]][classes[pred]] += 1
 
     fig = px.imshow(
         matrix,
-        x=predicted_classes.keys(),
-        y=true_classes.keys(),
+        x=list(classes.keys()),
+        y=list(classes.keys()),
         title="Confusion Matrix",
+    ).update_layout(
         xaxis_title="Predicted Class",
         yaxis_title="True Class",
     )
 
-    to_html(fig)
+    with open(file_path, "w") as output:
+        output.write(to_html(fig, include_plotlyjs="cdn"))
+    print(f"Confusion matrix graph written to {Path(file_path).absolute()}")
