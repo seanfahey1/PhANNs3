@@ -4,7 +4,9 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import plotly.express as px
 from Bio import SeqIO
+from plotly.io import to_html
 from tqdm import tqdm
 from utils.data_handler import Data, fasta_count
 
@@ -75,8 +77,6 @@ def predict(model_name, test_X):
         y_hats.append(y_hat)
 
         clear_session()
-        del model
-        del y_hat
 
     predicted_Y = np.sum(y_hats, axis=0)
     predicted_Y_index = np.argmax(predicted_Y, axis=1)
@@ -109,3 +109,24 @@ def write_initial_prediction_outputs(
                 f"{line[0]},{','.join(['{:.4f}'.format(x) for x in line[1]])},{line[2]}\n"
             )
     print(f"Initial predictions written to {Path(output_file).absolute()}")
+
+
+def confusion_matrix(file_path, true_class, predicted_class):
+    true_classes = {x: i for i, x in enumerate(sorted(list(set(true_class))))}
+    predicted_classes = {x: i for i, x in enumerate(sorted(list(set(predicted_class))))}
+
+    matrix = np.zeros((len(true_classes), len(predicted_classes)))
+    for true in true_class:
+        for pred in predicted_class:
+            matrix[true_classes[true]][predicted_classes[pred]] += 1
+
+    fig = px.imshow(
+        matrix,
+        x=predicted_classes.keys(),
+        y=true_classes.keys(),
+        title="Confusion Matrix",
+        xaxis_title="Predicted Class",
+        yaxis_title="True Class",
+    )
+
+    to_html(fig)
