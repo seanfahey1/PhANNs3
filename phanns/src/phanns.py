@@ -165,14 +165,14 @@ def train():
         sorted_group_names,
     ) = train_custom_model.load_dataset(train_args.fasta_dir)
 
-    # store_newly_generated_model(
-    #     train_args.model_name, stdev_array, mean_array, sorted_group_names
-    # )
+    store_newly_generated_model(
+        train_args.model_name, stdev_array, mean_array, sorted_group_names
+    )
 
-    # print("Starting model training step.")
-    # train_custom_model.train_new_model(
-    #     train_args.model_name, class_arr, group_arr, zscore_array
-    # )
+    print("Starting model training step.")
+    train_custom_model.train_new_model(
+        train_args.model_name, class_arr, group_arr, zscore_array
+    )
     predicted_Y, predicted_Y_index = predict.predict(
         train_args.model_name, test_X=zscore_array[group_arr == 11]
     )
@@ -181,14 +181,14 @@ def train():
     predicted_class = [class_number_assignments[x] for x in predicted_Y_index]
     true_class = [class_number_assignments[x] for x in class_arr]
 
-    # print("Starting initial prediction step.")
-    # predict.write_initial_prediction_outputs(
-    #     f"{train_args.model_name}_initial_results.csv",
-    #     predicted_Y,
-    #     predicted_class,
-    #     sorted_group_names,
-    #     true_class,
-    # )
+    print("Starting initial prediction step.")
+    predict.write_initial_prediction_outputs(
+        f"{train_args.model_name}_initial_results.csv",
+        predicted_Y,
+        predicted_class,
+        sorted_group_names,
+        true_class,
+    )
 
     predict.confusion_matrix(
         f"{train_args.model_name}_initial_confusion_matrix.html",
