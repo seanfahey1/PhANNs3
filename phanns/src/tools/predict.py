@@ -69,7 +69,7 @@ def predict(model_name, test_X):
     print("Calculating predictions")
 
     for model_number in tqdm(range(1, 11)):
-        model_full_name = f"{'{:02d}'.format(model_number)}.keras"
+        model_full_name = f"{'{:02d}'.format(model_number)}.hdf5"
         model_path = stored_model_dir / model_full_name
         model = load_model(model_path)
 
@@ -116,9 +116,8 @@ def confusion_matrix(file_path, true_class, predicted_class):
     classes = {x: i for i, x in enumerate(sorted(all_classes))}
 
     matrix = np.zeros((len(classes), len(classes)))
-    for true in true_class:
-        for pred in predicted_class:
-            matrix[classes[true]][classes[pred]] += 1
+    for true, pred in zip(true_class, predicted_class):
+        matrix[classes[true]][classes[pred]] += 1
 
     fig = px.imshow(
         matrix,

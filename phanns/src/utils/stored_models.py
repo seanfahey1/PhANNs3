@@ -26,8 +26,8 @@ def validate_model(name):
         assert "model_files" in dirs
         assert "arrays" in dirs
 
-        model_files = [x.name for x in model_dir.glob("model_files/*.keras")]
-        for name in [f"{i:02d}.keras" for i in range(1, 11)]:
+        model_files = [x.name for x in model_dir.glob("model_files/*.hdf5")]
+        for name in [f"{i:02d}.hdf5" for i in range(1, 11)]:
             assert name in model_files
 
         data_files = [x.name for x in model_dir.glob("arrays/*.parquet")]
@@ -54,7 +54,7 @@ def load_stored_model(name: str):
         sorted_group_names = list(np.array(parquet_table["sorted_group_names"]))
 
     models_dir = saved_model_dir / "model_files/"
-    model_paths = [str(x.absolute) for x in models_dir.glob("*.keras")]
+    model_paths = [str(x.absolute) for x in models_dir.glob("*.hdf5")]
 
     return model_paths, mean_arr, std_arr, sorted_group_names
 

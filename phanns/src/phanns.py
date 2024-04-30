@@ -1,5 +1,7 @@
 import argparse
+import pickle as p
 import sys
+import time
 
 from tools import predict, train_custom_model
 
@@ -155,24 +157,53 @@ def load():
 def train():
     train_args = get_train_args()
 
-    print("Starting data loading step.")
-    (
-        mean_array,
-        stdev_array,
-        zscore_array,
-        group_arr,
-        class_arr,
-        sorted_group_names,
-    ) = train_custom_model.load_dataset(train_args.fasta_dir)
+    # print("Starting data loading step.")
+    # (
+    #     mean_array,
+    #     stdev_array,
+    #     zscore_array,
+    #     group_arr,
+    #     class_arr,
+    #     sorted_group_names,
+    # ) = train_custom_model.load_dataset(train_args.fasta_dir)
 
-    store_newly_generated_model(
-        train_args.model_name, stdev_array, mean_array, sorted_group_names
-    )
+    # store_newly_generated_model(
+    #     train_args.model_name, stdev_array, mean_array, sorted_group_names
+    # )
+
+    # with open('mean.cache', 'wb') as m:
+    #     p.dump(mean_array, m)
+    # with open('stdev.cache', 'wb') as m:
+    #     p.dump(stdev_array, m)
+    # with open('zscore.cache', 'wb') as m:
+    #     p.dump(zscore_array, m)
+    # with open('group.cache', 'wb') as m:
+    #           p.dump(group_arr, m)
+    # with open('class.cache', 'wb') as m:
+    #           p.dump(class_arr, m)
+    # with open('sorted_groups.cache', 'wb') as m:
+    #           p.dump(sorted_group_names, m)
+
+    with open("mean.cache", "rb") as m:
+        mean_array = p.load(m)
+    with open("stdev.cache", "rb") as m:
+        stdev_array = p.load(m)
+    with open("zscore.cache", "rb") as m:
+        zscore_array = p.load(m)
+    with open("group.cache", "rb") as m:
+        group_arr = p.load(m)
+    with open("class.cache", "rb") as m:
+        class_arr = p.load(m)
+    with open("sorted_groups.cache", "rb") as m:
+        sorted_group_names = p.load(m)
 
     print("Starting model training step.")
-    train_custom_model.train_new_model(
-        train_args.model_name, class_arr, group_arr, zscore_array
-    )
+    for model_number in range(1, 11):
+        train_custom_model.train_new_model(
+            train_args.model_name, class_arr, group_arr, zscore_array, model_number
+        )
+        time.sleep(2)
+
     predicted_Y, predicted_Y_index = predict.predict(
         train_args.model_name, test_X=zscore_array[group_arr == 11]
     )
