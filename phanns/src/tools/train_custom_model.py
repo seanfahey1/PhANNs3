@@ -8,8 +8,8 @@ from Bio import SeqIO
 from tqdm import tqdm
 
 sys.path.append("..")
+import tensorflow as tf
 from sklearn.utils.class_weight import compute_class_weight
-from tensorflow.distribute import MirroredStrategy
 from tensorflow.keras import Input
 from tensorflow.keras import backend as K
 from tensorflow.keras.backend import clear_session
@@ -83,7 +83,7 @@ def load_dataset(fasta_dir):
 
 
 def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
-    strategy = MirroredStrategy()
+    strategy = tf.distribute.MirroredStrategy()
     with strategy.scope():
         print(f"model {model_number}")
         train_X = zscore_array[(group_arr != model_number) & (group_arr != 11)]
