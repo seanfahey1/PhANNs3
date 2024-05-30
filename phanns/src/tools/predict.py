@@ -69,7 +69,7 @@ def predict(model_name, test_X):
     print("Calculating predictions")
 
     for model_number in tqdm(range(1, 11)):
-        model_full_name = f"{'{:02d}'.format(model_number)}.hdf5"
+        model_full_name = f"{'{:02d}'.format(model_number)}.keras"
         model_path = stored_model_dir / model_full_name
         model = load_model(model_path)
 

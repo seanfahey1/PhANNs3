@@ -167,10 +167,12 @@ def train():
         sorted_group_names,
     ) = train_custom_model.load_dataset(train_args.fasta_dir)
 
+    print("Storing newly generated data.")
     store_newly_generated_model(
         train_args.model_name, stdev_array, mean_array, sorted_group_names
     )
 
+    print("Writing caches.")
     with open("mean.cache", "wb") as m:
         p.dump(mean_array, m)
     with open("stdev.cache", "wb") as m:

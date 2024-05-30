@@ -107,7 +107,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     val_model_path = str(
         (
             stored_models.get_model_dir(name)
-            / f'model_files/val_{"{:02d}".format(model_number)}.hdf5'
+            / f'model_files/val_{"{:02d}".format(model_number)}.keras'
         ).resolve()
     )
 
@@ -122,7 +122,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     acc_model_path = str(
         (
             stored_models.get_model_dir(name)
-            / f'model_files/acc_{"{:02d}".format(model_number)}.hdf5'
+            / f'model_files/acc_{"{:02d}".format(model_number)}.keras'
         ).resolve()
     )
 
@@ -177,7 +177,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     model_path = str(
         (
             stored_models.get_model_dir(name)
-            / f'model_files/{"{:02d}".format(model_number)}.hdf5'
+            / f'model_files/{"{:02d}".format(model_number)}.keras'
         ).resolve()
     )
     model.save(model_path)
@@ -207,7 +207,7 @@ def initial_predict(model_name, zscore_array, group_arr, class_arr):
     logging.getLogger("tensorflow").setLevel(logging.ERROR)
     print("Running initial model testing")
     for model_number in tqdm(range(1, 11)):
-        model_full_name = f"{'{:02d}'.format(model_number)}.hdf5"
+        model_full_name = f"{'{:02d}'.format(model_number)}.keras"
         model_path = stored_model_dir / model_full_name
         model = load_model(model_path)
 
