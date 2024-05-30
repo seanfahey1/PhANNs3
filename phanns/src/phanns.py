@@ -158,34 +158,35 @@ def train():
     train_args = get_train_args()
 
     print("Starting data loading step.")
-    (
-        mean_array,
-        stdev_array,
-        zscore_array,
-        group_arr,
-        class_arr,
-        sorted_group_names,
-    ) = train_custom_model.load_dataset(train_args.fasta_dir)
+    # (
+    #     mean_array,
+    #     stdev_array,
+    #     zscore_array,
+    #     group_arr,
+    #     class_arr,
+    #     sorted_group_names,
+    # ) = train_custom_model.load_dataset(train_args.fasta_dir)
 
-    print("Storing newly generated data.")
-    store_newly_generated_model(
-        train_args.model_name, stdev_array, mean_array, sorted_group_names
-    )
+    # print("Storing newly generated data.")
+    # store_newly_generated_model(
+    #     train_args.model_name, stdev_array, mean_array, sorted_group_names
+    # )
 
-    print("Writing caches.")
-    with open("mean.cache", "wb") as m:
-        p.dump(mean_array, m)
-    with open("stdev.cache", "wb") as m:
-        p.dump(stdev_array, m)
-    with open("zscore.cache", "wb") as m:
-        p.dump(zscore_array, m)
-    with open("group.cache", "wb") as m:
-        p.dump(group_arr, m)
-    with open("class.cache", "wb") as m:
-        p.dump(class_arr, m)
-    with open("sorted_groups.cache", "wb") as m:
-        p.dump(sorted_group_names, m)
+    # print("Writing caches.")
+    # with open("mean.cache", "wb") as m:
+    #     p.dump(mean_array, m)
+    # with open("stdev.cache", "wb") as m:
+    #     p.dump(stdev_array, m)
+    # with open("zscore.cache", "wb") as m:
+    #     p.dump(zscore_array, m)
+    # with open("group.cache", "wb") as m:
+    #     p.dump(group_arr, m)
+    # with open("class.cache", "wb") as m:
+    #     p.dump(class_arr, m)
+    # with open("sorted_groups.cache", "wb") as m:
+    #     p.dump(sorted_group_names, m)
 
+    print("Loading from cache.")
     with open("mean.cache", "rb") as m:
         mean_array = p.load(m)
     with open("stdev.cache", "rb") as m:
