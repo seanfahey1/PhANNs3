@@ -141,7 +141,9 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     train_weights = dict(zip(range(num_classes), class_weights))
 
     model = Sequential()
-    opt = Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False)
+    opt = Adam(
+        learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False
+    )  # drop lr, maybe change beta_1&2
     model.add(Input(shape=(feature_count,)))
     model.add(
         Dense(
@@ -163,7 +165,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
         train_Y,
         validation_data=(test_X, test_Y),
         epochs=120,
-        batch_size=5000,
+        batch_size=5000,  # maybe set this to sqrt(size of dataset) ~700 ish
         verbose=2,
         class_weight=train_weights,
         callbacks=[es, mc, mc2],
