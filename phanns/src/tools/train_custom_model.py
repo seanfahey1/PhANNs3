@@ -95,7 +95,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
 
     # These arrays basically OHE the class to columns. Instead of a bunch of class numbers, we have an array with a
     # single `1` on each row indicating the class.
-    train_Y = np.eye(num_classes)[train_Y_index]
+    train_Y = np.eye(num_classes)[train_Y_index]  # TODO: Is this right??
     test_Y = np.eye(num_classes)[
         test_Y_index
     ]  # TODO: check that removing the -1 here fixed the indexing issue.
@@ -169,7 +169,8 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
         batch_size=5000,  # maybe set this to sqrt(size of dataset) ~700 ish
         verbose=2,
         class_weight=train_weights,
-        callbacks=[es, mc, mc2],
+        # callbacks=[es, mc, mc2],
+        callbacks=[es],
     )
 
     test_Y_prediction_values = model.predict(test_X)
