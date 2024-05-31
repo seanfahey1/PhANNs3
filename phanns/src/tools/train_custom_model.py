@@ -116,6 +116,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
         monitor="val_loss",
         mode="min",
         save_best_only=True,
+        save_weights_only=True,
         verbose=1,
     )
 
@@ -131,6 +132,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
         monitor="val_accuracy",
         mode="max",
         save_best_only=True,
+        save_weights_only=True,
         verbose=1,
     )
 
@@ -180,7 +182,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
             / f'model_files/{"{:02d}".format(model_number)}.keras'
         ).resolve()
     )
-    model.save(model_path)
+    model.save(model_path, include_optimizer=False)
 
     model_val = load_model(val_model_path)
     test_Y_prediction_values_val = model.predict(test_X)

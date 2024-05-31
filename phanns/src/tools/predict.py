@@ -119,11 +119,14 @@ def confusion_matrix(file_path, true_class, predicted_class):
     for true, pred in zip(true_class, predicted_class):
         matrix[classes[true]][classes[pred]] += 1
 
+    row_sums = matrix.sum(axis=1)
+    normalized_matrix = matrix / row_sums[:, np.newaxis]
+
     fig = px.imshow(
-        matrix,
+        normalized_matrix,
         x=list(classes.keys()),
         y=list(classes.keys()),
-        title="Confusion Matrix",
+        title="Confusion Matrix - Recall",
     ).update_layout(
         xaxis_title="Predicted Class",
         yaxis_title="True Class",
