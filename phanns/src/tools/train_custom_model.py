@@ -8,6 +8,7 @@ from Bio import SeqIO
 from tqdm import tqdm
 
 sys.path.append("..")
+import tensorflow as tf
 from sklearn.utils.class_weight import compute_class_weight
 from tensorflow.keras import Input
 from tensorflow.keras import backend as K
@@ -16,7 +17,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.optimizers import SGD, Adam
-from utils import calc, stored_models
+from utils import calc_arrays, stored_models
 from utils.data_handler import Data, fasta_count
 
 
@@ -69,7 +70,7 @@ def load_dataset(fasta_dir):
             row_counter += 1
 
     print("Calculating z-score normalization")
-    mean_array, stdev_array, zscore_array = calc.zscore(data.arr)
+    mean_array, stdev_array, zscore_array = calc_arrays.zscore(data.arr)
 
     return (
         mean_array,
@@ -144,7 +145,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     # opt = Adam(
     #     learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False
     # )  # drop lr, maybe change beta_1&2
-    opt = SGD(learning_rate=0.001)
+    opt = SGD(learning_rate=0.01)
     model.add(Input(shape=(feature_count,)))
     model.add(
         Dense(
@@ -184,18 +185,20 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     )
     model.save(model_path)
 
-    model_val = load_model(val_model_path)
-    test_Y_prediction_values_val = model.predict(test_X)
-    test_Y_predicted_val = np.argmax(test_Y_prediction_values_val, axis=1)
+    # model_val = load_model(val_model_path)
+    # test_Y_prediction_values_val = model.predict(test_X)
+    # test_Y_predicted_val = np.argmax(test_Y_prediction_values_val, axis=1)
 
-    model_acc = load_model(acc_model_path)
-    test_Y_prediction_values_acc = model.predict(test_X)
-    test_Y_predicted_acc = np.argmax(test_Y_prediction_values_acc, axis=1)
+    # model_acc = load_model(acc_model_path)
+    # test_Y_prediction_values_acc = model.predict(test_X)
+    # test_Y_predicted_acc = np.argmax(test_Y_prediction_values_acc, axis=1)
 
     K.clear_session()
     del model
+    tf.compat.v1.reset_default_graph()
 
     print(test_Y_predicted)
+    return
 
 
 def initial_predict(model_name, zscore_array, group_arr, class_arr):

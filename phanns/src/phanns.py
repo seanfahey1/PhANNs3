@@ -1,4 +1,5 @@
 import argparse
+import gc
 import pickle as p
 import sys
 import time
@@ -6,6 +7,7 @@ import time
 from tools import predict, train_custom_model
 
 # fmt: off
+gc.disable()
 sys.path.append("..")
 from utils.stored_models import (export_model, list_models, load_model,
                                  load_stored_model, move_model, remove_model,
@@ -155,6 +157,7 @@ def load():
 
 
 def train():
+    gc.enable()
     train_args = get_train_args()
 
     print("Starting data loading step.")
@@ -206,6 +209,7 @@ def train():
             train_args.model_name, class_arr, group_arr, zscore_array, model_number
         )
         time.sleep(2)
+        gc.collect()
 
     predicted_Y, predicted_Y_index = predict.predict(
         train_args.model_name, test_X=zscore_array[group_arr == 11]
@@ -229,6 +233,7 @@ def train():
         true_class,
         predicted_class,
     )
+    gc.disable()
 
 
 def classify():
