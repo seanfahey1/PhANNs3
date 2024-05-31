@@ -15,7 +15,7 @@ from tensorflow.keras.backend import clear_session
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimizers import SGD, Adam
 from utils import calc, stored_models
 from utils.data_handler import Data, fasta_count
 
@@ -141,9 +141,10 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     train_weights = dict(zip(range(num_classes), class_weights))
 
     model = Sequential()
-    opt = Adam(
-        learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False
-    )  # drop lr, maybe change beta_1&2
+    # opt = Adam(
+    #     learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False
+    # )  # drop lr, maybe change beta_1&2
+    opt = SGD(learning_rate=0.001)
     model.add(Input(shape=(feature_count,)))
     model.add(
         Dense(
@@ -180,7 +181,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
             / f'model_files/{"{:02d}".format(model_number)}.keras'
         ).resolve()
     )
-    model.save(model_path, include_optimizer=False)
+    model.save(model_path)
 
     model_val = load_model(val_model_path)
     test_Y_prediction_values_val = model.predict(test_X)
