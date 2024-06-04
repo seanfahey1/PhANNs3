@@ -64,7 +64,7 @@ def store_newly_generated_model(
     std_arr: np.array,
     mean_arr: np.array,
     group_arr: np.array,
-    class_arr: np.arr,
+    class_arr: np.array,
     sorted_group_names: list,
 ):
     saved_model_dir = get_model_dir(name)
