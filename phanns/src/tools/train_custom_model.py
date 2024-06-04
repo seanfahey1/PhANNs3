@@ -91,7 +91,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     test_Y_index = class_arr[(group_arr == model_number)]
 
     feature_count = train_X.shape[1]
-    unique_classes = np.unique(train_Y_index)
+    unique_classes = sorted(np.unique(train_Y_index))
     num_classes = len(unique_classes)
 
     # These arrays basically OHE the class to columns. Instead of a bunch of class numbers, we have an array with a
@@ -136,7 +136,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     )
 
     class_weights = compute_class_weight(
-        class_weight="balanced", classes=np.unique(train_Y_index), y=train_Y_index
+        class_weight="balanced", classes=unique_classes, y=train_Y_index
     )
 
     train_weights = dict(zip(range(num_classes), class_weights))
@@ -167,7 +167,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
         train_Y,
         validation_data=(test_X, test_Y),
         epochs=120,
-        batch_size=5000,  # maybe set this to sqrt(size of dataset) ~700 ish
+        batch_size=750,  # maybe set this to sqrt(size of dataset) ~700 ish, orig 5000
         verbose=2,
         class_weight=train_weights,
         # callbacks=[es, mc, mc2],

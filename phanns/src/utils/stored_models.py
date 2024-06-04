@@ -60,7 +60,12 @@ def load_stored_model(name: str):
 
 
 def store_newly_generated_model(
-    name: str, std_arr: np.array, mean_arr: np.array, sorted_group_names: list
+    name: str,
+    std_arr: np.array,
+    mean_arr: np.array,
+    group_arr: np.array,
+    class_arr: np.arr,
+    sorted_group_names: list,
 ):
     saved_model_dir = get_model_dir(name)
     array_dir = saved_model_dir / "arrays"
@@ -69,10 +74,7 @@ def store_newly_generated_model(
     model_dir.mkdir(exist_ok=True, parents=True)
 
     parquet_table = pa.table(
-        {
-            "std": std_arr,
-            "mean": mean_arr,
-        }
+        {"std": std_arr, "mean": mean_arr, "group": group_arr, "class": class_arr}
     )
     group_names_table = pa.table({"sorted_group_names": np.array(sorted_group_names)})
 

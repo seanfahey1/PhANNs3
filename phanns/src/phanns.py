@@ -172,7 +172,12 @@ def train():
 
     print("Storing newly generated data.")
     store_newly_generated_model(
-        train_args.model_name, stdev_array, mean_array, sorted_group_names
+        train_args.model_name,
+        stdev_array,
+        mean_array,
+        group_arr,
+        class_arr,
+        sorted_group_names,
     )
 
     print("Writing caches.")
