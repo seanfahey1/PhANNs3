@@ -107,6 +107,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
 
     print(train_Y)
     print(train_Y_index)
+    print(train_X)
 
     es = EarlyStopping(
         monitor="loss", mode="min", verbose=2, patience=5, min_delta=0.02
@@ -151,18 +152,22 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     print(class_weights)
     print(train_weights)
 
-    # opt = Adam(
-    #     learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False, epsilon=1e-08,
-    # )  # drop lr, maybe change beta_1&2
-    opt = SGD(learning_rate=0.01)
+    opt = Adam(
+        learning_rate=0.001,
+        beta_1=0.9,
+        beta_2=0.999,
+        amsgrad=False,
+        epsilon=1e-08,
+    )  # drop lr, maybe change beta_1&2
+    # opt = SGD(learning_rate=0.01)
     # model.add(Input(shape=(feature_count,)))  # OMG is this the error??? Do I need to combine this layer with the next???
     model = Sequential(
         [
-            Input(shape=(feature_count,)),
+            # Input(shape=(feature_count,)),
             Dense(
                 feature_count,
-                # input_shape=(feature_count,),
-                # kernel_initializer="random_uniform",
+                input_shape=(feature_count,),
+                kernel_initializer="random_uniform",
                 activation="relu",
             ),
             Dropout(0.2),
@@ -184,6 +189,8 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     # model.add(Dense(num_classes, activation="softmax"))
 
     model.compile(loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"])
+    print(model.summary())
+
     history = model.fit(
         train_X,
         train_Y,
