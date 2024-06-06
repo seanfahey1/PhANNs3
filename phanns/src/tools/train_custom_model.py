@@ -26,7 +26,7 @@ def load_dataset(fasta_dir):
         raise ValueError(f"Selected directory ({fasta_dir}) does not exist!")
 
     # collect files
-    fastas = list(Path(fasta_dir).glob("*.fasta"))
+    fastas = sorted(list(Path(fasta_dir).glob("*.fasta")))
 
     if len(fastas) == 0:
         raise ValueError(f"No .fasta files found at target directory: {fasta_dir}")
@@ -105,45 +105,51 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
         test_Y_index
     ]  # TODO: check that removing the -1 here fixed the indexing issue.
 
+    print(train_Y)
+    print(train_Y_index)
+
     es = EarlyStopping(
         monitor="loss", mode="min", verbose=2, patience=5, min_delta=0.02
     )
 
-    val_model_path = str(
-        (
-            stored_models.get_model_dir(name)
-            / f'model_files/val_{"{:02d}".format(model_number)}.keras'
-        ).resolve()
-    )
+    # val_model_path = str(
+    #     (
+    #         stored_models.get_model_dir(name)
+    #         / f'model_files/val_{"{:02d}".format(model_number)}.keras'
+    #     ).resolve()
+    # )
 
-    mc = ModelCheckpoint(
-        val_model_path,
-        monitor="val_loss",
-        mode="min",
-        save_best_only=True,
-        verbose=1,
-    )
+    # mc = ModelCheckpoint(
+    #     val_model_path,
+    #     monitor="val_loss",
+    #     mode="min",
+    #     save_best_only=True,
+    #     verbose=1,
+    # )
 
-    acc_model_path = str(
-        (
-            stored_models.get_model_dir(name)
-            / f'model_files/acc_{"{:02d}".format(model_number)}.keras'
-        ).resolve()
-    )
+    # acc_model_path = str(
+    #     (
+    #         stored_models.get_model_dir(name)
+    #         / f'model_files/acc_{"{:02d}".format(model_number)}.keras'
+    #     ).resolve()
+    # )
 
-    mc2 = ModelCheckpoint(
-        acc_model_path,
-        monitor="val_accuracy",
-        mode="max",
-        save_best_only=True,
-        verbose=1,
-    )
+    # mc2 = ModelCheckpoint(
+    #     acc_model_path,
+    #     monitor="val_accuracy",
+    #     mode="max",
+    #     save_best_only=True,
+    #     verbose=1,
+    # )
 
     class_weights = compute_class_weight(
-        class_weight="balanced", classes=unique_classes, y=train_Y_index
+        class_weight="balanced", classes=np.unique(train_Y_index), y=train_Y_index
     )
 
     train_weights = dict(zip(range(num_classes), class_weights))
+
+    print(class_weights)
+    print(train_weights)
 
     # opt = Adam(
     #     learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False, epsilon=1e-08,
