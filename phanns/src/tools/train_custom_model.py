@@ -113,35 +113,35 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
         monitor="loss", mode="min", verbose=2, patience=5, min_delta=0.02
     )
 
-    # val_model_path = str(
-    #     (
-    #         stored_models.get_model_dir(name)
-    #         / f'model_files/val_{"{:02d}".format(model_number)}.keras'
-    #     ).resolve()
-    # )
+    val_model_path = str(
+        (
+            stored_models.get_model_dir(name)
+            / f'model_files/val_{"{:02d}".format(model_number)}.keras'
+        ).resolve()
+    )
 
-    # mc = ModelCheckpoint(
-    #     val_model_path,
-    #     monitor="val_loss",
-    #     mode="min",
-    #     save_best_only=True,
-    #     verbose=1,
-    # )
+    mc = ModelCheckpoint(
+        val_model_path,
+        monitor="val_loss",
+        mode="min",
+        save_best_only=True,
+        verbose=1,
+    )
 
-    # acc_model_path = str(
-    #     (
-    #         stored_models.get_model_dir(name)
-    #         / f'model_files/acc_{"{:02d}".format(model_number)}.keras'
-    #     ).resolve()
-    # )
+    acc_model_path = str(
+        (
+            stored_models.get_model_dir(name)
+            / f'model_files/acc_{"{:02d}".format(model_number)}.keras'
+        ).resolve()
+    )
 
-    # mc2 = ModelCheckpoint(
-    #     acc_model_path,
-    #     monitor="val_accuracy",
-    #     mode="max",
-    #     save_best_only=True,
-    #     verbose=1,
-    # )
+    mc2 = ModelCheckpoint(
+        acc_model_path,
+        monitor="val_accuracy",
+        mode="max",
+        save_best_only=True,
+        verbose=1,
+    )
 
     class_weights = compute_class_weight(
         class_weight="balanced", classes=np.unique(train_Y_index), y=train_Y_index
@@ -205,8 +205,8 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
         batch_size=5000,  # maybe set this to sqrt(size of dataset) ~700 ish, orig 5000
         verbose=2,
         class_weight=train_weights,
-        # callbacks=[es, mc, mc2],
-        callbacks=[es],
+        callbacks=[es, mc, mc2],
+        # callbacks=[es],
     )
 
     test_Y_prediction_values = model.predict(test_X)
