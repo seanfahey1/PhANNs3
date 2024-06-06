@@ -40,7 +40,7 @@ def load_dataset(fasta_dir):
 
     class_number_assignments = {x: i for i, x in enumerate(sorted_group_names)}
 
-    for k, v in class_number_assignments:
+    for k, v in class_number_assignments.items():
         print(f"{k}:\t{v}")
 
     # init Data object
