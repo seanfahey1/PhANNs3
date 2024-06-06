@@ -40,6 +40,9 @@ def load_dataset(fasta_dir):
 
     class_number_assignments = {x: i for i, x in enumerate(sorted_group_names)}
 
+    for k, v in class_number_assignments:
+        print(f"{k}:\t{v}")
+
     # init Data object
     num_proteins = fasta_count(fastas)
     data = Data(num_proteins)
@@ -55,7 +58,8 @@ def load_dataset(fasta_dir):
         group_number = match.group("prefix")
         cls_number = class_number_assignments[cls]
 
-        print(file_path)
+        print(f"{file_path}, class:{cls_number}, group:{group_number}")
+
         records = SeqIO.parse(file_path, "fasta")
         num_proteins_current_file = fasta_count([file_path])
         for _ in tqdm(range(num_proteins_current_file)):
@@ -141,25 +145,37 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
 
     train_weights = dict(zip(range(num_classes), class_weights))
 
-    model = Sequential()
     # opt = Adam(
-    #     learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False
+    #     learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False, epsilon=1e-08,
     # )  # drop lr, maybe change beta_1&2
     opt = SGD(learning_rate=0.01)
-    model.add(Input(shape=(feature_count,)))
-    model.add(
-        Dense(
-            feature_count,
-            kernel_initializer="random_uniform",
-            activation="relu",
-        )
+    # model.add(Input(shape=(feature_count,)))  # OMG is this the error??? Do I need to combine this layer with the next???
+    model = Sequential(
+        [
+            Input(shape=(feature_count,)),
+            Dense(
+                feature_count,
+                # input_shape=(feature_count,),
+                # kernel_initializer="random_uniform",
+                activation="relu",
+            ),
+            Dropout(0.2),
+            Dense(200, activation="relu"),
+            Dropout(0.2),
+            Dense(200, activation="relu"),
+            Dropout(0.2),
+            Dense(num_classes, activation="softmax"),
+        ]
     )
-    model.add(Dropout(0.2))
-    model.add(Dense(200, activation="relu"))
-    model.add(Dropout(0.2))
-    model.add(Dense(200, activation="relu"))
-    model.add(Dropout(0.2))
-    model.add(Dense(num_classes, activation="softmax"))
+    # model.add(
+
+    # )
+    # model.add()
+    # model.add()
+    # model.add(Dropout(0.2))
+    # model.add(Dense(200, activation="relu"))
+    # model.add(Dropout(0.2))
+    # model.add(Dense(num_classes, activation="softmax"))
 
     model.compile(loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"])
     history = model.fit(
