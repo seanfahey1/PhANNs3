@@ -152,6 +152,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     print(class_weights)
     print(train_weights)
 
+    model = Sequential()
     opt = Adam(
         learning_rate=0.001,
         beta_1=0.9,
@@ -201,7 +202,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
         train_Y,
         validation_data=(test_X, test_Y),
         epochs=120,
-        batch_size=750,  # maybe set this to sqrt(size of dataset) ~700 ish, orig 5000
+        batch_size=5000,  # maybe set this to sqrt(size of dataset) ~700 ish, orig 5000
         verbose=2,
         class_weight=train_weights,
         # callbacks=[es, mc, mc2],
