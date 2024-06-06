@@ -161,34 +161,39 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     )  # drop lr, maybe change beta_1&2
     # opt = SGD(learning_rate=0.01)
     # model.add(Input(shape=(feature_count,)))  # OMG is this the error??? Do I need to combine this layer with the next???
-    model = Sequential(
-        [
-            # Input(shape=(feature_count,)),
-            Dense(
-                feature_count,
-                input_shape=(feature_count,),
-                kernel_initializer="random_uniform",
-                activation="relu",
-            ),
-            Dropout(0.2),
-            Dense(200, activation="relu"),
-            Dropout(0.2),
-            Dense(200, activation="relu"),
-            Dropout(0.2),
-            Dense(num_classes, activation="softmax"),
-        ]
-    )
-    # model.add(
-
+    # model = Sequential(
+    #     [
+    #         # Input(shape=(feature_count,)),
+    #         Dense(
+    #             feature_count,
+    #             input_shape=(feature_count,),
+    #             kernel_initializer="random_uniform",
+    #             activation="relu",
+    #         ),
+    #         Dropout(0.2),
+    #         Dense(200, activation="relu"),
+    #         Dropout(0.2),
+    #         Dense(200, activation="relu"),
+    #         Dropout(0.2),
+    #         Dense(num_classes, activation="softmax"),
+    #     ]
     # )
-    # model.add()
-    # model.add()
-    # model.add(Dropout(0.2))
-    # model.add(Dense(200, activation="relu"))
-    # model.add(Dropout(0.2))
-    # model.add(Dense(num_classes, activation="softmax"))
-
+    model.add(Input(shape=(feature_count,)))
+    model.add(
+        Dense(
+            feature_count,
+            kernel_initializer="random_uniform",
+            activation="relu",
+        )
+    )
+    model.add(Dropout(0.2))
+    model.add(Dense(200, activation="relu"))
+    model.add(Dropout(0.2))
+    model.add(Dense(200, activation="relu"))
+    model.add(Dropout(0.2))
+    model.add(Dense(num_classes, activation="softmax"))
     model.compile(loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"])
+
     print(model.summary())
 
     history = model.fit(
