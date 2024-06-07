@@ -116,7 +116,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     val_model_path = str(
         (
             stored_models.get_model_dir(name)
-            / f'model_files/val_{"{:02d}".format(model_number)}.keras'
+            / f'model_files/val_{"{:02d}".format(model_number)}.h5'
         ).resolve()
     )
 
@@ -131,7 +131,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     acc_model_path = str(
         (
             stored_models.get_model_dir(name)
-            / f'model_files/acc_{"{:02d}".format(model_number)}.keras'
+            / f'model_files/acc_{"{:02d}".format(model_number)}.h5'
         ).resolve()
     )
 
