@@ -17,7 +17,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.optimizers import SGD, Adam
-from utils import calc_arrays, stored_models
+from utils import calc, stored_models
 from utils.data_handler import Data, fasta_count
 
 
@@ -74,7 +74,7 @@ def load_dataset(fasta_dir):
             row_counter += 1
 
     print("Calculating z-score normalization")
-    mean_array, stdev_array, zscore_array = calc_arrays.zscore(data.arr)
+    mean_array, stdev_array, zscore_array = calc.zscore(data.arr)
 
     return (
         mean_array,
