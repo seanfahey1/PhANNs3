@@ -83,6 +83,7 @@ def load_dataset(fasta_dir):
         group_arr,
         class_arr,
         sorted_group_names,
+        data.arr,
     )
 
 
