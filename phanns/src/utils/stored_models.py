@@ -74,12 +74,17 @@ def store_newly_generated_model(
     model_dir.mkdir(exist_ok=True, parents=True)
 
     parquet_table = pa.table(
-        {"std": std_arr, "mean": mean_arr, "group": group_arr, "class": class_arr}
+        {
+            "std": std_arr,
+            "mean": mean_arr,
+        }
     )
     group_names_table = pa.table({"sorted_group_names": np.array(sorted_group_names)})
+    group_class_table = pa.table({"group": group_arr, "class": class_arr})
 
     pq.write_table(parquet_table, array_dir / "arr.parquet")
     pq.write_table(group_names_table, array_dir / "class_names_arr.parquet")
+    pq.write_table(group_class_table, array_dir / "group_class_id_arr.parquet")
 
     pass
 
