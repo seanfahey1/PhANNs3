@@ -195,7 +195,7 @@ def train():
     with open("sorted_groups.cache", "wb") as m:
         p.dump(sorted_group_names, m)
     with open("raw_data.cache", "wb") as m:
-        p.dump(data_arr, m)
+        p.dump(data_array, m)
 
     print("Loading from cache.")
     with open("mean.cache", "rb") as m:
@@ -211,7 +211,7 @@ def train():
     with open("sorted_groups.cache", "rb") as m:
         sorted_group_names = p.load(m)
     with open("raw_data.cache", "rb") as m:
-        data_arr = p.load(m)
+        data_array = p.load(m)
 
     print("Starting model training step.")
     for model_number in range(1, 11):
