@@ -106,7 +106,12 @@ class Data:
             (start_flexibility_mean + end_flexibility_mean) / 2
         )
 
-        seq_quintiles = [sequence[i : i + 5] for i in range(0, len(sequence), 5)]
+        quintile_size = int(round(len(sequence) / 5, 0))
+        seq_quintiles = [
+            sequence[i * quintile_size : (i * quintile_size) + quintile_size]
+            for i in range(5)
+        ] + [sequence[quintile_size * 4 :]]
+
         for seq_quintile in seq_quintiles:
             print(seq_quintile)
             Xn = ProteinAnalysis(seq_quintile)
