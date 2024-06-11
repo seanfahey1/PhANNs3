@@ -108,6 +108,7 @@ class Data:
 
         seq_quintiles = [sequence[i : i + 5] for i in range(0, len(sequence), 5)]
         for seq_quintile in seq_quintiles:
+            print(seq_quintile)
             Xn = ProteinAnalysis(seq_quintile)
             additional_biochemical_features.append(Xn.isoelectric_point())
             additional_biochemical_features.append(Xn.gravy())
