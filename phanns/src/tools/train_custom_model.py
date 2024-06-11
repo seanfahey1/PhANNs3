@@ -154,14 +154,14 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     print(train_weights)
 
     model = Sequential()
-    opt = Adam(
-        learning_rate=0.001,
-        beta_1=0.9,
-        beta_2=0.999,
-        amsgrad=False,
-        epsilon=1e-08,
-    )  # drop lr, maybe change beta_1&2
-    # opt = SGD(learning_rate=0.01)
+    # opt = Adam(
+    #     learning_rate=0.001,
+    #     beta_1=0.9,
+    #     beta_2=0.999,
+    #     amsgrad=False,
+    #     epsilon=1e-08,
+    # )  # drop lr, maybe change beta_1&2
+    opt = SGD(learning_rate=0.001)
     # model.add(Input(shape=(feature_count,)))  # OMG is this the error??? Do I need to combine this layer with the next???
     # model = Sequential(
     #     [

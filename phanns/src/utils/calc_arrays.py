@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import zscore as zs
 
 
-def zscore(array):
+def zscore(array):  # THIS IS WRONG AXIS. SHOULD BE 0!!!! check before fix...
     """
     Calculates the mean, standard deviation, and zscore arrays for PhANNs data loading.
     """
