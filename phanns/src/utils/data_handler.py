@@ -13,7 +13,8 @@ from utils import count
 
 class Data:
     def __init__(self, protein_count):
-        self.arr = np.empty((protein_count, 11201), dtype=np.float64)
+        self.arr = np.empty((protein_count, 11240), dtype=np.float64)
+        # self.arr = np.empty((protein_count, 11201), dtype=np.float64)
         self.class_arr = np.empty(protein_count, dtype=int)
         self.group_arr = np.empty(protein_count, dtype=int)
         self.id_arr = np.empty(protein_count, dtype=int)
@@ -109,11 +110,10 @@ class Data:
         quintile_size = int(round(len(sequence) / 5, 0))
         seq_quintiles = [
             sequence[i * quintile_size : (i * quintile_size) + quintile_size]
-            for i in range(5)
+            for i in range(4)
         ] + [sequence[quintile_size * 4 :]]
 
         for seq_quintile in seq_quintiles:
-            print(seq_quintile)
             Xn = ProteinAnalysis(seq_quintile)
             additional_biochemical_features.append(Xn.isoelectric_point())
             additional_biochemical_features.append(Xn.gravy())
@@ -133,7 +133,6 @@ class Data:
         additional_biochemical_features_array = np.asarray(
             additional_biochemical_features, dtype=np.float64
         )
-        print(additional_biochemical_features)
 
         row = np.concatenate(
             (
