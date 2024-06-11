@@ -76,36 +76,57 @@ class Data:
 
         biochemical_features_array = np.asarray(biochemical_features, dtype=np.float64)
 
-        # additional_biochemical_features = []
-        # additional_biochemical_features.append(X.secondary_structure_fraction()[0])
-        # additional_biochemical_features.append(X.secondary_structure_fraction()[1])
-        # additional_biochemical_features.append(X.secondary_structure_fraction()[2])
-        # additional_biochemical_features.append((sequence.count("R") + sequence.count("L") + sequence.count("K")) / len_seq)  # acidic fraction
-        # additional_biochemical_features.append((sequence.count("D") + sequence.count("E")) / len_seq)  # basic fraction
-        # additional_biochemical_features.append(np.mean(X.flexibility()))  # mean flexibility
-        # flex_smoothed = [
-        #         np.mean(X.flexibility()[i : i + 5]) for i in range(len(X.flexibility()) - 5)
-        #     ]
-        # additional_biochemical_features.append(max(flex_smoothed))  # peak of smoothed flexibility
-        # additional_biochemical_features.append(X.flexibility().index(max(X.flexibility())) / len(X.flexibility()))  # peak flexibility relative position
+        additional_biochemical_features = []
+        additional_biochemical_features.append(X.secondary_structure_fraction()[0])
+        additional_biochemical_features.append(X.secondary_structure_fraction()[1])
+        additional_biochemical_features.append(X.secondary_structure_fraction()[2])
+        additional_biochemical_features.append(
+            (sequence.count("R") + sequence.count("L") + sequence.count("K")) / len_seq
+        )  # acidic fraction
+        additional_biochemical_features.append(
+            (sequence.count("D") + sequence.count("E")) / len_seq
+        )  # basic fraction
+        additional_biochemical_features.append(
+            np.mean(X.flexibility())
+        )  # mean flexibility
+        flex_smoothed = [
+            np.mean(X.flexibility()[i : i + 5]) for i in range(len(X.flexibility()) - 5)
+        ]
+        additional_biochemical_features.append(
+            max(flex_smoothed)
+        )  # peak of smoothed flexibility
+        additional_biochemical_features.append(
+            X.flexibility().index(max(X.flexibility())) / len(X.flexibility())
+        )  # peak flexibility relative position
 
-        # five_percent_range = int(round(len(X.flexibility()) * 0.05, 0))
-        # start_flexibility_mean = np.mean(X.flexibility()[:five_percent_range])
-        # end_flexibility_mean = np.mean(X.flexibility()[-five_percent_range:])
-        # additional_biochemical_features.append(
-        #     (start_flexibility_mean + end_flexibility_mean) / 2
-        # )
+        five_percent_range = int(round(len(X.flexibility()) * 0.05, 0))
+        start_flexibility_mean = np.mean(X.flexibility()[:five_percent_range])
+        end_flexibility_mean = np.mean(X.flexibility()[-five_percent_range:])
+        additional_biochemical_features.append(
+            (start_flexibility_mean + end_flexibility_mean) / 2
+        )
 
-        # seq_quintiles = [sequence[i:i+5] for i in range(0, len(sequence), 5)]
-        # for seq_quintile in seq_quintiles:
-        #     Xn = ProteinAnalysis(seq_quintile)
-        #     additional_biochemical_features.append(Xn.isoelectric_point())
-        #     additional_biochemical_features.append(Xn.gravy())
-        #     additional_biochemical_features.append((seq_quintile.count("R") + seq_quintile.count("L") + seq_quintile.count("K")) / len(seq_quintile))  # acidic fraction
-        #     additional_biochemical_features.append((seq_quintile.count("D") + seq_quintile.count("E")) / len(seq_quintile))  # basic fraction
-        #     additional_biochemical_features.append(np.mean(Xn.flexibility()))
+        seq_quintiles = [sequence[i : i + 5] for i in range(0, len(sequence), 5)]
+        for seq_quintile in seq_quintiles:
+            Xn = ProteinAnalysis(seq_quintile)
+            additional_biochemical_features.append(Xn.isoelectric_point())
+            additional_biochemical_features.append(Xn.gravy())
+            additional_biochemical_features.append(
+                (
+                    seq_quintile.count("R")
+                    + seq_quintile.count("L")
+                    + seq_quintile.count("K")
+                )
+                / len(seq_quintile)
+            )  # acidic fraction
+            additional_biochemical_features.append(
+                (seq_quintile.count("D") + seq_quintile.count("E")) / len(seq_quintile)
+            )  # basic fraction
+            additional_biochemical_features.append(np.mean(Xn.flexibility()))
 
-        # additional_biochemical_features_array = np.asarray(additional_biochemical_features, dtype=np.float64)
+        additional_biochemical_features_array = np.asarray(
+            additional_biochemical_features, dtype=np.float64
+        )
 
         row = np.concatenate(
             (
@@ -115,6 +136,7 @@ class Data:
                 tri_sc_count_n,
                 tetra_sc_count_n,
                 biochemical_features_array,
+                additional_biochemical_features_array,
             )
         )
         row = row.reshape((1, row.shape[0]))
