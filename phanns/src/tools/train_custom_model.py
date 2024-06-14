@@ -219,7 +219,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
         sum(
             [
                 1 if test_Y_predicted[i] == test_Y[i] else 0
-                for i in range(test_Y_predicted)
+                for i in range(len(test_Y_predicted))
             ]
         )
         / len(test_Y_predicted)
