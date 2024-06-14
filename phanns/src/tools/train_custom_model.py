@@ -213,7 +213,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     )
 
     test_Y_prediction_values = model.predict(test_X)
-    test_Y_predicted = np.argmax(test_Y_prediction_values, axis=1)
+    test_Y_predicted = list(np.argmax(test_Y_prediction_values, axis=1))
     print(test_Y_predicted)
     print(
         sum(
