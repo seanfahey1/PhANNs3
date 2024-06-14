@@ -73,11 +73,12 @@ def load_dataset(fasta_dir):
         # TODO: add multiprocessing here for faster load times, even if it means
         # moving tqdm to the file level...
         progress = 0
+        num_workers = 70
         with tqdm(
-            bar_format="Exceptions: {postfix} | Elapsed: {elapsed} | {rate_fmt}",
+            bar_format="Progress: {postfix} | Elapsed: {elapsed} | {rate_fmt}",
             postfix=progress,
         ) as t:
-            with ProcessPoolExecutor() as executor:
+            with ProcessPoolExecutor(max_workers=num_workers) as executor:
                 # Submit tasks and collect futures
                 futures = {
                     executor.submit(process_protein, (item, data.feature_extract)): i
