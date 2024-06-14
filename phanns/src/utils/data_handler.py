@@ -13,8 +13,8 @@ from utils import count_substrings as count
 
 class Data:
     def __init__(self, protein_count):
-        self.arr = np.empty((protein_count, 11235), dtype=np.float64)
-        # self.arr = np.empty((protein_count, 11201), dtype=np.float64)
+        # self.arr = np.empty((protein_count, 11235), dtype=np.float64)
+        self.arr = np.empty((protein_count, 11201), dtype=np.float64)
         self.class_arr = np.empty(protein_count, dtype=int)
         self.group_arr = np.empty(protein_count, dtype=int)
         self.id_arr = np.empty(protein_count, dtype=int)
@@ -142,7 +142,7 @@ class Data:
                 tri_sc_count_n,
                 tetra_sc_count_n,
                 biochemical_features_array,
-                additional_biochemical_features_array,
+                # additional_biochemical_features_array,
             )
         )
         row = row.reshape((1, row.shape[0]))
