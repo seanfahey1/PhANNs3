@@ -21,11 +21,10 @@ from tensorflow.keras.optimizers import SGD, Adam
 from utils import calc, stored_models
 from utils.data_handler import Data, fasta_count
 
-
-def process_protein(record, feature_extract_function):
-    sequence = record.seq.__str__().upper()
-    row = feature_extract_function(sequence)
-    return row
+# def process_protein(record, feature_extract_function):
+#     sequence = record.seq.__str__().upper()
+#     row = feature_extract_function(sequence)
+#     return row
 
 
 def load_dataset(fasta_dir):
@@ -68,51 +67,51 @@ def load_dataset(fasta_dir):
         print(f"{file_path}, class:{cls_number}, group:{group_number}")
 
         records = list(SeqIO.parse(file_path, "fasta"))
-        # num_proteins_current_file = fasta_count([file_path])
+        num_proteins_current_file = fasta_count([file_path])
 
         # TODO: add multiprocessing here for faster load times, even if it means
         # moving tqdm to the file level...
-        progress = 0
-        num_workers = 70
-        with tqdm(
-            bar_format="Progress: {postfix} | Elapsed: {elapsed} | {rate_fmt}",
-            postfix=progress,
-        ) as t:
-            with ProcessPoolExecutor(max_workers=num_workers) as executor:
-                # Submit tasks and collect futures
-                futures = {
-                    executor.submit(process_protein, (item, data.feature_extract)): i
-                    for i, item in enumerate(records)
-                }
+        # progress = 0
+        # num_workers = 70
+        # with tqdm(
+        #     bar_format="Progress: {postfix} | Elapsed: {elapsed} | {rate_fmt}",
+        #     postfix=progress,
+        # ) as t:
+        #     with ProcessPoolExecutor(max_workers=num_workers) as executor:
+        #         # Submit tasks and collect futures
+        #         futures = {
+        #             executor.submit(process_protein, (item, data.feature_extract)): i
+        #             for i, item in enumerate(records)
+        #         }
 
-                # Retrieve results as they complete
-                for future in as_completed(futures):
-                    progress += 1
-                    i = futures[future]
-                    try:
-                        row = future.result()
-                        data.add_to_array(
-                            row, row_counter + i, cls_number, group_number
-                        )
-                        group_arr[row_counter + i] = group_number
-                        class_arr[row_counter + i] = cls_number
+        #         # Retrieve results as they complete
+        #         for future in as_completed(futures):
+        #             progress += 1
+        #             i = futures[future]
+        #             try:
+        #                 row = future.result()
+        #                 data.add_to_array(
+        #                     row, row_counter + i, cls_number, group_number
+        #                 )
+        #                 group_arr[row_counter + i] = group_number
+        #                 class_arr[row_counter + i] = cls_number
 
-                    except Exception as e:
-                        print(f"Error processing item {i}: {e}")
+        #             except Exception as e:
+        #                 print(f"Error processing item {i}: {e}")
 
-        num_proteins_current_file = fasta_count([file_path])
-        row_counter += num_proteins_current_file
+        # num_proteins_current_file = fasta_count([file_path])
+        # row_counter += num_proteins_current_file
 
-        # for _ in tqdm(range(num_proteins_current_file)):
-        #     record = next(records)
-        #     sequence = record.seq.__str__().upper()
-        #     row = data.feature_extract(sequence)
-        #     data.add_to_array(row, row_counter, cls_number, group_number)
+        for _ in tqdm(range(num_proteins_current_file)):
+            record = next(records)
+            sequence = record.seq.__str__().upper()
+            row = data.feature_extract(sequence)
+            data.add_to_array(row, row_counter, cls_number, group_number)
 
-        #     group_arr[row_counter] = group_number
-        #     class_arr[row_counter] = cls_number
+            group_arr[row_counter] = group_number
+            class_arr[row_counter] = cls_number
 
-        #     row_counter += 1
+            row_counter += 1
 
     print("Calculating z-score normalization")
     mean_array, stdev_array, zscore_array = calc.zscore(data.arr)
