@@ -90,10 +90,12 @@ def load_dataset(fasta_dir):
 def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     print(f"model {model_number}")
     train_X = zscore_array[(group_arr != model_number) & (group_arr != 11)]
-    test_X = zscore_array[group_arr == model_number]
+    val_X = zscore_array[group_arr == model_number]
+    test_X = zscore_array[group_arr == 11]
 
     train_Y_index = class_arr[(group_arr != model_number) & (group_arr != 11)]
-    test_Y_index = class_arr[(group_arr == model_number)]
+    val_Y_index = class_arr[group_arr == model_number]
+    test_Y = class_arr[group_arr == 11]
 
     feature_count = train_X.shape[1]
     unique_classes = sorted(np.unique(train_Y_index))
@@ -102,8 +104,8 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     # These arrays basically OHE the class to columns. Instead of a bunch of class numbers, we have an array with a
     # single `1` on each row indicating the class.
     train_Y = np.eye(num_classes)[train_Y_index]  # TODO: Is this right??
-    test_Y = np.eye(num_classes)[
-        test_Y_index
+    val_Y = np.eye(num_classes)[
+        val_Y_index
     ]  # TODO: check that removing the -1 here fixed the indexing issue.
 
     print(train_Y)
@@ -201,7 +203,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     history = model.fit(
         train_X,
         train_Y,
-        validation_data=(test_X, test_Y),
+        validation_data=(val_X, val_Y),
         epochs=120,
         batch_size=5000,  # maybe set this to sqrt(size of dataset) ~700 ish, orig 5000
         verbose=2,
@@ -212,6 +214,16 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
 
     test_Y_prediction_values = model.predict(test_X)
     test_Y_predicted = np.argmax(test_Y_prediction_values, axis=1)
+    print(test_Y_predicted)
+    print(
+        sum(
+            [
+                1 if test_Y_predicted[i] == test_Y[i] else 0
+                for i in range(test_Y_predicted)
+            ]
+        )
+        / len(test_Y_predicted)
+    )
 
     model_path = str(
         (
@@ -233,7 +245,6 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     del model
     tf.compat.v1.reset_default_graph()
 
-    print(test_Y_predicted)
     return
 
 
