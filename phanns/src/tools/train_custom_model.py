@@ -72,25 +72,32 @@ def load_dataset(fasta_dir):
 
         # TODO: add multiprocessing here for faster load times, even if it means
         # moving tqdm to the file level...
+        progress = 0
+        with tqdm(
+            bar_format="Exceptions: {postfix} | Elapsed: {elapsed} | {rate_fmt}",
+            postfix=progress,
+        ) as t:
+            with ProcessPoolExecutor() as executor:
+                # Submit tasks and collect futures
+                futures = {
+                    executor.submit(process_protein, (item, data.feature_extract)): i
+                    for i, item in enumerate(records)
+                }
 
-        with ProcessPoolExecutor() as executor:
-            # Submit tasks and collect futures
-            futures = {
-                executor.submit(process_protein, (item, data.feature_extract)): i
-                for i, item in enumerate(records)
-            }
+                # Retrieve results as they complete
+                for future in as_completed(futures):
+                    progress += 1
+                    i = futures[future]
+                    try:
+                        row = future.result()
+                        data.add_to_array(
+                            row, row_counter + i, cls_number, group_number
+                        )
+                        group_arr[row_counter + i] = group_number
+                        class_arr[row_counter + i] = cls_number
 
-            # Retrieve results as they complete
-            for future in as_completed(futures):
-                i = futures[future]
-                try:
-                    row = future.result()
-                    data.add_to_array(row, row_counter + i, cls_number, group_number)
-                    group_arr[row_counter + i] = group_number
-                    class_arr[row_counter + i] = cls_number
-
-                except Exception as e:
-                    print(f"Error processing item {i}: {e}")
+                    except Exception as e:
+                        print(f"Error processing item {i}: {e}")
 
         num_proteins_current_file = fasta_count([file_path])
         row_counter += num_proteins_current_file
