@@ -77,7 +77,7 @@ def load_dataset(fasta_dir):
             # Submit tasks and collect futures
             futures = {
                 executor.submit(process_protein, (item, data.feature_extract)): i
-                for i, item in enumerate(data)
+                for i, item in enumerate(records)
             }
 
             # Retrieve results as they complete
