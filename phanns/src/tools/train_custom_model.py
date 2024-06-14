@@ -62,6 +62,10 @@ def load_dataset(fasta_dir):
 
         records = SeqIO.parse(file_path, "fasta")
         num_proteins_current_file = fasta_count([file_path])
+
+        # TODO: add multiprocessing here for faster load times, even if it means
+        # moving tqdm to the file level...
+
         for _ in tqdm(range(num_proteins_current_file)):
             record = next(records)
             sequence = record.seq.__str__().upper()
@@ -207,7 +211,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
         epochs=120,
         batch_size=5000,  # maybe set this to sqrt(size of dataset) ~700 ish, orig 5000
         verbose=2,
-        class_weight=train_weights,
+        # class_weight=train_weights,
         callbacks=[es, mc, mc2],
         # callbacks=[es],
     )
