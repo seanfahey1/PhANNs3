@@ -221,13 +221,17 @@ def train():
         time.sleep(2)
         gc.collect()
 
+    # this may have fixed everything...
+    test_X = zscore_array[group_arr == 11]
+    test_y = class_arr[group_arr == 11]
+
     predicted_Y, predicted_Y_index = predict.predict(
-        train_args.model_name, test_X=zscore_array[group_arr == 11]
+        train_args.model_name, test_X=test_X
     )
 
     class_number_assignments = {i: x for i, x in enumerate(sorted_group_names)}
     predicted_class = [class_number_assignments[x] for x in predicted_Y_index]
-    true_class = [class_number_assignments[x] for x in class_arr]
+    true_class = [class_number_assignments[x] for x in test_y]
 
     print("Starting initial prediction step.")
     predict.write_initial_prediction_outputs(

@@ -16,13 +16,15 @@ def zscore(np.ndarray[np.float64_t, ndim=2] array):
     cdef int i, j
     cdef double mean_val, stddev_val, zscore_val
 
+    # loop through columns
     for i in range(array.shape[1]):
-        mean_val = np.mean(array[:, i])
-        stddev_val = np.std(array[:, i])
+        mean_val = np.mean(array[:, i])  # column mean
+        stddev_val = np.std(array[:, i])  # column std dev
 
         mean_array[i] = mean_val
         stddev_array[i] = stddev_val
 
+        # loop through rows
         for j in range(array.shape[0]):
             if stddev_val != 0:
                 zscore_val = (array[j, i] - mean_val) / stddev_val

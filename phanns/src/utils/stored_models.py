@@ -86,8 +86,6 @@ def store_newly_generated_model(
     pq.write_table(group_names_table, array_dir / "class_names_arr.parquet")
     pq.write_table(group_class_table, array_dir / "group_class_id_arr.parquet")
 
-    pass
-
 
 def store_model_from_disk(name, model_dir):
     saved_model_dir = Path(__file__).parent / f"model_files/{name}/"
