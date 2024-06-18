@@ -66,7 +66,7 @@ def load_dataset(fasta_dir):
 
         print(f"{file_path}, class:{cls_number}, group:{group_number}")
 
-        records = list(SeqIO.parse(file_path, "fasta"))
+        records = SeqIO.parse(file_path, "fasta")
         num_proteins_current_file = fasta_count([file_path])
 
         # TODO: add multiprocessing here for faster load times, even if it means
