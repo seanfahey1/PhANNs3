@@ -191,10 +191,10 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     )
 
     train_weights = dict(zip(np.unique(train_Y_index), class_weights))
+    train_weights = {k: v / sum(train_weights.keys()) for k, v in train_weights}
 
     print(class_weights)
     print(train_weights)
-    sys.exit()
 
     model = Sequential()
     opt = Adam(
@@ -208,7 +208,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     # model.add(Input(shape=(feature_count,)))  # OMG is this the error??? Do I need to combine this layer with the next???
     model = Sequential(
         [
-            # Input(shape=(feature_count,)),
+            Input(shape=(feature_count,)),
             Dense(
                 feature_count,
                 input_shape=(feature_count,),
@@ -240,6 +240,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     model.compile(loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"])
 
     print(model.summary())
+    sys.exit()
 
     history = model.fit(
         train_X,
