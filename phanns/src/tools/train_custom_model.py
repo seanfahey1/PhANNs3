@@ -191,7 +191,9 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     )
 
     train_weights = dict(zip(np.unique(train_Y_index), class_weights))
-    train_weights = {k: (v / sum(train_weights.values())) for k, v in train_weights}
+    train_weights = {
+        k: (v / sum(train_weights.values())) for k, v in train_weights.items()
+    }
 
     print(class_weights)
     print(train_weights)
