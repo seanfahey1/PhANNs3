@@ -190,10 +190,11 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
         class_weight="balanced", classes=np.unique(train_Y_index), y=train_Y_index
     )
 
-    train_weights = dict(zip(range(num_classes), class_weights))
+    train_weights = dict(zip(np.unique(train_Y_index), class_weights))
 
     print(class_weights)
     print(train_weights)
+    sys.exit()
 
     model = Sequential()
     opt = Adam(
@@ -247,7 +248,7 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
         epochs=120,
         batch_size=5000,  # maybe set this to sqrt(size of dataset) ~700 ish, orig 5000
         verbose=2,
-        # class_weight=train_weights,
+        class_weight=train_weights,
         callbacks=[es, mc, mc2],
         # callbacks=[es],
     )
