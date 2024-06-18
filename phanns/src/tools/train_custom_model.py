@@ -242,7 +242,6 @@ def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
     model.compile(loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"])
 
     print(model.summary())
-    sys.exit()
 
     history = model.fit(
         train_X,
