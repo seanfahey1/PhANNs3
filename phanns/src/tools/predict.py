@@ -5,6 +5,7 @@ from pathlib import Path
 
 import numpy as np
 import plotly.express as px
+import torch
 from Bio import SeqIO
 from plotly.io import to_html
 from tqdm import tqdm
@@ -12,6 +13,7 @@ from utils.data_handler import Data, fasta_count
 
 sys.path.append("..")
 
+from model import SequentialNN
 from tensorflow.keras.backend import clear_session
 from tensorflow.keras.models import load_model
 from utils import stored_models
@@ -59,6 +61,41 @@ def z_score_from_pre_calculated(data, stdev_arr, mean_arr):
             data[row_num, col_num] = z_val
 
     return data
+
+
+def predict_pytorch(model_name, test_X, model_sizes):
+    y_hats = []
+
+    stored_model_dir = stored_models.get_model_dir(model_name) / "model_files/"
+    print("Calculating predictions")
+
+    for model_number in tqdm(range(1, 11)):
+        feature_count, num_classes = model_sizes[model_number]
+
+        assert torch.cuda.is_available()
+        device = torch.device("cuda")
+
+        model_full_name = f"{'{:02d}'.format(model_number)}.pt"
+        model_path = stored_model_dir / model_full_name
+
+        model = SequentialNN(feature_count, num_classes)
+        model.load_state_dict(torch.load(model_path))
+
+        model.to(device)
+        model.eval()
+
+        with torch.no_grad():
+            y_hat = model(test_X)
+        y_hats.append(y_hat)
+
+        del model
+        del y_hat
+        torch.cuda.empty_cache()
+
+    predicted_Y = np.sum(y_hats, axis=0)
+    predicted_Y_index = np.argmax(predicted_Y, axis=1)
+
+    return predicted_Y, predicted_Y_index
 
 
 def predict(model_name, test_X):

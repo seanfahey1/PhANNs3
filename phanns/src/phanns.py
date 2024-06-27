@@ -213,11 +213,15 @@ def train():
     with open("raw_data.cache", "rb") as m:
         data_array = p.load(m)
 
+    model_sizes = dict()
+
     print("Starting model training step.")
     for model_number in range(1, 11):
-        train_custom_model.train_new_model(
+        feature_count, num_classes = train_custom_model.train_new_pytorch_model(
             train_args.model_name, class_arr, group_arr, zscore_array, model_number
         )
+        model_sizes[model_number] = (feature_count, num_classes)
+
         time.sleep(2)
         gc.collect()
 
@@ -230,8 +234,8 @@ def train():
     with open("test_y.cache", "wb") as m:
         p.dump(test_y, m)
 
-    predicted_Y, predicted_Y_index = predict.predict(
-        train_args.model_name, test_X=test_X
+    predicted_Y, predicted_Y_index = predict.predict_pytorch(
+        train_args.model_name, test_X=test_X, model_sizes=model_sizes
     )
 
     class_number_assignments = {i: x for i, x in enumerate(sorted_group_names)}
