@@ -13,9 +13,9 @@ from utils.data_handler import Data, fasta_count
 
 sys.path.append("..")
 
-from model import SequentialNN
 from tensorflow.keras.backend import clear_session
 from tensorflow.keras.models import load_model
+from tools.model import SequentialNN
 from utils import stored_models
 from utils.data_handler import Data, fasta_count
 

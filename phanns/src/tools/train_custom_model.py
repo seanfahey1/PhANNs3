@@ -16,8 +16,8 @@ import tensorflow as tf
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from model import SequentialNN
 from sklearn.utils.class_weight import compute_class_weight
+from tools.model import SequentialNN
 from torch.cuda.amp import GradScaler, autocast
 from torch.utils.data import DataLoader, TensorDataset
 from utils import calc, stored_models
