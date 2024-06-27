@@ -113,6 +113,10 @@ def load_dataset(fasta_dir):
     print("Calculating z-score normalization")
     mean_array, stdev_array, zscore_array = calc.zscore(data.arr)
 
+    zscore_array = np.array(zscore_array, dtype=np.float32)
+    mean_array = np.array(mean_array, dtype=np.float32)
+    stdev_array = np.array(stdev_array, dtype=np.float32)
+
     return (
         mean_array,
         stdev_array,
