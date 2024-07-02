@@ -101,6 +101,11 @@ def get_train_args():
         required=True,
         help="Name of the stored model.",
     )
+    parser.add_argument(
+        "--cache",
+        action="store_true",
+        help="Boolean flag to force loading zscore calculations from cache if the program terminated early on the previous run. Only use if you're sure the .cache files were written correctly.",
+    )
     args, _ = parser.parse_known_args()
     return args
 
@@ -160,58 +165,60 @@ def train():
     gc.enable()
     train_args = get_train_args()
 
-    print("Starting data loading step.")
-    (
-        mean_array,
-        stdev_array,
-        zscore_array,
-        group_arr,
-        class_arr,
-        sorted_group_names,
-        data_array,
-    ) = train_custom_model.load_dataset(train_args.fasta_dir)
+    if not train_args.cache:
+        print("Starting data loading step.")
+        (
+            mean_array,
+            stdev_array,
+            zscore_array,
+            group_arr,
+            class_arr,
+            sorted_group_names,
+            data_array,
+        ) = train_custom_model.load_dataset(train_args.fasta_dir)
 
-    print("Storing newly generated data.")
-    store_newly_generated_model(
-        train_args.model_name,
-        stdev_array,
-        mean_array,
-        group_arr,
-        class_arr,
-        sorted_group_names,
-    )
+        print("Storing newly generated data.")
+        store_newly_generated_model(
+            train_args.model_name,
+            stdev_array,
+            mean_array,
+            group_arr,
+            class_arr,
+            sorted_group_names,
+        )
 
-    print("Writing caches.")
-    with open("mean.cache", "wb") as m:
-        p.dump(mean_array, m)
-    with open("stdev.cache", "wb") as m:
-        p.dump(stdev_array, m)
-    with open("zscore.cache", "wb") as m:
-        p.dump(zscore_array, m)
-    with open("group.cache", "wb") as m:
-        p.dump(group_arr, m)
-    with open("class.cache", "wb") as m:
-        p.dump(class_arr, m)
-    with open("sorted_groups.cache", "wb") as m:
-        p.dump(sorted_group_names, m)
-    with open("raw_data.cache.multithreaded", "wb") as m:
-        p.dump(data_array, m)
+        print("Writing caches.")
+        with open("mean.cache", "wb") as m:
+            p.dump(mean_array, m)
+        with open("stdev.cache", "wb") as m:
+            p.dump(stdev_array, m)
+        with open("zscore.cache", "wb") as m:
+            p.dump(zscore_array, m)
+        with open("group.cache", "wb") as m:
+            p.dump(group_arr, m)
+        with open("class.cache", "wb") as m:
+            p.dump(class_arr, m)
+        with open("sorted_groups.cache", "wb") as m:
+            p.dump(sorted_group_names, m)
+        with open("raw_data.cache.multithreaded", "wb") as m:
+            p.dump(data_array, m)
 
-    print("Loading from cache.")
-    with open("mean.cache", "rb") as m:
-        mean_array = p.load(m)
-    with open("stdev.cache", "rb") as m:
-        stdev_array = p.load(m)
-    with open("zscore.cache", "rb") as m:
-        zscore_array = p.load(m)
-    with open("group.cache", "rb") as m:
-        group_arr = p.load(m)
-    with open("class.cache", "rb") as m:
-        class_arr = p.load(m)
-    with open("sorted_groups.cache", "rb") as m:
-        sorted_group_names = p.load(m)
-    with open("raw_data.cache", "rb") as m:
-        data_array = p.load(m)
+    else:
+        print("Loading from cache.")
+        with open("mean.cache", "rb") as m:
+            mean_array = p.load(m)
+        with open("stdev.cache", "rb") as m:
+            stdev_array = p.load(m)
+        with open("zscore.cache", "rb") as m:
+            zscore_array = p.load(m)
+        with open("group.cache", "rb") as m:
+            group_arr = p.load(m)
+        with open("class.cache", "rb") as m:
+            class_arr = p.load(m)
+        with open("sorted_groups.cache", "rb") as m:
+            sorted_group_names = p.load(m)
+        with open("raw_data.cache", "rb") as m:
+            data_array = p.load(m)
 
     model_sizes = dict()
 

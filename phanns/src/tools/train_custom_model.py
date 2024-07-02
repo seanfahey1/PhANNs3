@@ -1,7 +1,5 @@
-import logging
 import re
 import sys
-from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 import numpy as np
@@ -9,10 +7,8 @@ from Bio import SeqIO
 from tqdm import tqdm
 
 sys.path.append("..")
-from collections import OrderedDict
 
 import numpy as np
-import tensorflow as tf
 import torch
 import torch.nn as nn
 import torch.optim as optim
