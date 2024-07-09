@@ -157,6 +157,7 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
     best_val_loss = float("inf")
     best_val_accuracy = 0
     patience = 5
+    break_in = 5
     min_delta = 0.02
     patience_counter = 0
     model_path = str(
@@ -257,10 +258,11 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
             # torch.save(model.state_dict(), val_model_path)
             # print("Model saved (best validation loss)")
         else:
-            patience_counter += 1
-            if patience_counter >= patience:
-                print("Early stopping")
-                break
+            if epoch >= break_in:
+                patience_counter += 1
+                if patience_counter >= patience:
+                    print("Early stopping")
+                    break
 
         # Save best accuracy model
         if val_accuracy > best_val_accuracy:
