@@ -170,13 +170,13 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
     class_weights = compute_class_weight(
         class_weight="balanced", classes=np.unique(train_Y_index), y=train_Y_index
     )
-    class_weights = torch.FloatTensor(class_weights)
+    class_weights = torch.FloatTensor(class_weights).to(device)
 
     # create the model
     model = SequentialNN(feature_count, num_classes).to(device)
 
     # loss function and optimizer
-    criterion = nn.CrossEntropyLoss(weight=class_weights)
+    criterion = nn.CrossEntropyLoss(weight=class_weights).to(device)
     optimizer = optim.Adam(
         model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-08
     )
