@@ -64,7 +64,12 @@ def z_score_from_pre_calculated(data, stdev_arr, mean_arr):
 
 
 def predict_pytorch(model_name, test_X, model_sizes):
+    # set up cuda
+    assert torch.cuda.is_available()
+    device = torch.device("cuda")
+
     y_hats = []
+    test_X_torch = torch.from_numpy(test_X).to(device)
 
     stored_model_dir = stored_models.get_model_dir(model_name) / "model_files/"
     print("Calculating predictions")
@@ -85,7 +90,7 @@ def predict_pytorch(model_name, test_X, model_sizes):
         model.eval()
 
         with torch.no_grad():
-            y_hat = model(torch.from_numpy(test_X))
+            y_hat = model(test_X_torch)
         y_hats.append(y_hat)
 
         del model
