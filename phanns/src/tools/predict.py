@@ -69,7 +69,7 @@ def predict_pytorch(model_name, test_X, model_sizes):
     device = torch.device("cuda")
 
     y_hats = []
-    test_X_torch = torch.from_numpy(test_X).to(device)
+    test_X_torch = torch.FloatTensor(test_X).to(device)
 
     stored_model_dir = stored_models.get_model_dir(model_name) / "model_files/"
     print("Calculating predictions")
