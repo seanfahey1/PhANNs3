@@ -221,18 +221,18 @@ def train():
         with open("raw_data.cache", "rb") as m:
             data_array = p.load(m)
 
-    # model_sizes = dict()
+    model_sizes = dict()
 
-    # print("Starting model training step.")
-    # for model_number in range(1, 11):
-    #     feature_count, num_classes = train_custom_model.train_new_pytorch_model(
-    #         train_args.model_name, class_arr, group_arr, zscore_array, model_number
-    #     )
-    #     model_sizes[model_number] = (feature_count, num_classes)
+    print("Starting model training step.")
+    for model_number in range(1, 11):
+        feature_count, num_classes = train_custom_model.train_new_pytorch_model(
+            train_args.model_name, class_arr, group_arr, zscore_array, model_number
+        )
+        model_sizes[model_number] = (feature_count, num_classes)
 
-    #     time.sleep(2)
-    #     gc.collect()
-    # store_model_sizes(train_args.model_name, model_sizes)
+        time.sleep(2)
+        gc.collect()
+    store_model_sizes(train_args.model_name, model_sizes)
     model_sizes = retrieve_model_sizes(train_args.model_name)
 
     test_X = zscore_array[group_arr == 11]
