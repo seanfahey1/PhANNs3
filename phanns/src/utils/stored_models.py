@@ -187,6 +187,14 @@ def store_model_sizes(model_name, model_size_dict):
 def retrieve_model_sizes(model_name):
     saved_model_dir = get_model_dir(model_name)
 
+    model_sizes = {}
+
     with open(saved_model_dir / "model_size/model_size.json", "r") as file:
-        model_sizes = json.load(file)
+        model_sizes_raw = json.load(file)
+    for k, v in model_sizes_raw.items():
+        try:
+            model_sizes[int(k)] = v
+        except ValueError:
+            model_sizes[k] = v
+
     return model_sizes
