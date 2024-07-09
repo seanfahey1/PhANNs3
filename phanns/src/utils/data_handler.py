@@ -142,7 +142,7 @@ class Data:
                 tri_sc_count_n,
                 tetra_sc_count_n,
                 biochemical_features_array,
-                # additional_biochemical_features_array,
+                additional_biochemical_features_array,
             )
         )
         row = row.reshape((1, row.shape[0]))

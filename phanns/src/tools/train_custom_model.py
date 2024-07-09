@@ -151,7 +151,7 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
 
     # define hyperparameters
     feature_count = train_X.shape[1]
-    learning_rate = 0.001
+    learning_rate = 0.0005
     epochs = 120
     batch_size = 5000
     best_val_loss = float("inf")
@@ -252,7 +252,7 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
         )
 
         # Early stopping
-        if val_loss < best_val_loss - min_delta:
+        if val_loss <= best_val_loss - min_delta:
             best_val_loss = val_loss
             patience_counter = 0
             # torch.save(model.state_dict(), val_model_path)
