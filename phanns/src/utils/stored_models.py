@@ -1,3 +1,4 @@
+import json
 import re
 import shutil
 import tarfile
@@ -26,13 +27,17 @@ def validate_model(name):
         assert "model_files" in dirs
         assert "arrays" in dirs
 
-        model_files = [x.name for x in model_dir.glob("model_files/*.keras")]
-        for name in [f"{i:02d}.keras" for i in range(1, 11)]:
+        model_files = [x.name for x in model_dir.glob("model_files/*.pt")]
+        for name in [f"{i:02d}.pt" for i in range(1, 11)]:
             assert name in model_files
 
         data_files = [x.name for x in model_dir.glob("arrays/*.parquet")]
         assert "arr.parquet" in data_files
         assert "class_names_arr.parquet" in data_files
+
+        model_size_file = [x.name for x in model_dir.glob("model_size/*.json")]
+        assert len(model_size_file) == 1
+        assert model_size_file == ["model_size.json"]
 
     except AssertionError as e:
         print(e)
@@ -167,3 +172,21 @@ def load_model(name, input_file):
                 contents = tar.extractfile(file)
                 with open(model_files_dir / file, "wb") as writer:
                     writer.write(contents)
+
+
+def store_model_sizes(model_name, model_size_dict):
+    saved_model_dir = get_model_dir(model_name)
+    model_size_dir = saved_model_dir / "model_size"
+
+    model_size_dir.mkdir(exist_ok=True, parents=True)
+
+    with open(model_size_dir / "model_size.json", "w") as out:
+        json.dump(model_size_dict, out)
+
+
+def retrieve_model_sizes(model_name):
+    saved_model_dir = get_model_dir(model_name)
+
+    with open(saved_model_dir / "model_size/model_size.json", "r") as file:
+        model_sizes = json.load(file)
+    return model_sizes

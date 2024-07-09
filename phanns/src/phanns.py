@@ -11,6 +11,7 @@ gc.disable()
 sys.path.append("..")
 from utils.stored_models import (export_model, list_models, load_model,
                                  load_stored_model, move_model, remove_model,
+                                 retrieve_model_sizes, store_model_sizes,
                                  store_newly_generated_model, validate_model)
 
 # fmt: on
@@ -222,23 +223,24 @@ def train():
 
     model_sizes = dict()
 
-    # print("Starting model training step.")
-    # for model_number in range(1, 11):
-    #     feature_count, num_classes = train_custom_model.train_new_pytorch_model(
-    #         train_args.model_name, class_arr, group_arr, zscore_array, model_number
-    #     )
-    #     model_sizes[model_number] = (feature_count, num_classes)
+    print("Starting model training step.")
+    for model_number in range(1, 11):
+        feature_count, num_classes = train_custom_model.train_new_pytorch_model(
+            train_args.model_name, class_arr, group_arr, zscore_array, model_number
+        )
+        model_sizes[model_number] = (feature_count, num_classes)
 
-    #     time.sleep(2)
-    #     gc.collect()
+        time.sleep(2)
+        gc.collect()
+    store_model_sizes(train_args.model_name, model_sizes)
 
     test_X = zscore_array[group_arr == 11]
     test_y = class_arr[group_arr == 11]
 
-    # with open("test_X.cache", "wb") as m:
-    #     p.dump(test_X, m)
-    # with open("test_y.cache", "wb") as m:
-    #     p.dump(test_y, m)
+    with open("test_X.cache", "wb") as m:
+        p.dump(test_X, m)
+    with open("test_y.cache", "wb") as m:
+        p.dump(test_y, m)
 
     predicted_Y, predicted_Y_index = predict.predict_pytorch(
         train_args.model_name, test_X=test_X, model_sizes=model_sizes
@@ -276,12 +278,13 @@ def classify():
     _, mean_arr, std_arr, sorted_group_names = load_stored_model(
         classify_args.model_name
     )
+    model_sizes = retrieve_model_sizes(classify_args.model_name)
 
     zscore_array, fasta_headers = predict.load_dataset(
         classify_args.fasta, mean_arr, std_arr
     )
-    prediction_scores, prediction = predict.predict(
-        classify_args.model_name, zscore_array
+    prediction_scores, prediction = predict.predict_pytorch(
+        classify_args.model_name, zscore_array, model_sizes
     )
 
     class_number_assignments = {i: x for i, x in enumerate(sorted_group_names)}
