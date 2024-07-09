@@ -101,16 +101,12 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
     # train/val/test split data
     train_X = zscore_array[(group_arr != model_number) & (group_arr != 11)]
     val_X = zscore_array[group_arr == model_number]
-    test_X = zscore_array[group_arr == 11]
 
     train_Y_index = class_arr[(group_arr != model_number) & (group_arr != 11)]
     val_Y_index = class_arr[group_arr == model_number]
-    test_Y = class_arr[group_arr == 11]
 
     unique_classes = sorted(np.unique(train_Y_index))
     num_classes = len(unique_classes)
-    train_Y = np.eye(num_classes)[train_Y_index]
-    val_Y = np.eye(num_classes)[val_Y_index]
 
     # define hyperparameters
     feature_count = train_X.shape[1]
@@ -234,41 +230,3 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
                     break
 
     return feature_count, num_classes
-
-
-def initial_predict_pytorch(
-    model_name, zscore_array, group_arr, class_arr, feature_count, num_classes
-):
-    test_X = zscore_array[group_arr == 11]
-    test_Y_index = class_arr[group_arr == 11]
-
-    y_hats = []
-    stored_model_dir = stored_models.get_model_dir(model_name) / "model_files/"
-
-    print("Running initial model testing")
-    for model_number in tqdm(range(1, 11)):
-        # set up cuda
-        assert torch.cuda.is_available()
-        device = torch.device("cuda")
-
-        model_full_name = f"{'{:02d}'.format(model_number)}.pt"
-        model_path = stored_model_dir / model_full_name
-
-        model = SequentialNN(feature_count, num_classes)
-        model.load_state_dict(torch.load(model_path))
-
-        model.to(device)
-        model.eval()
-
-        with torch.no_grad():
-            y_hat = model(test_X)
-        y_hats.append(y_hat)
-
-        del model
-        del y_hat
-        torch.cuda.empty_cache()
-
-    predicted_Y = np.sum(y_hats, axis=0)
-    predicted_Y_index = np.argmax(predicted_Y, axis=1)
-
-    return predicted_Y, predicted_Y_index
