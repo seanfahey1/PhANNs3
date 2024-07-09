@@ -85,7 +85,7 @@ def predict_pytorch(model_name, test_X, model_sizes):
         model.eval()
 
         with torch.no_grad():
-            y_hat = model(test_X)
+            y_hat = model(torch.from_numpy(test_X))
         y_hats.append(y_hat)
 
         del model
