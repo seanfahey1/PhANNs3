@@ -91,7 +91,7 @@ def predict_pytorch(model_name, test_X, model_sizes):
 
         with torch.no_grad():
             y_hat = model(test_X_torch)
-        y_hats.append(y_hat)
+        y_hats.append(y_hat.cpu())
 
         del model
         del y_hat
