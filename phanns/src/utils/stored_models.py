@@ -75,8 +75,10 @@ def store_newly_generated_model(
     saved_model_dir = get_model_dir(name)
     array_dir = saved_model_dir / "arrays"
     model_dir = saved_model_dir / "model_files"
+    model_size_dir = saved_model_dir / "model_size"
     array_dir.mkdir(exist_ok=True, parents=True)
     model_dir.mkdir(exist_ok=True, parents=True)
+    model_size_dir.mkdir(exist_ok=True, parents=True)
 
     parquet_table = pa.table(
         {

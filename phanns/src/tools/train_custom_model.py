@@ -62,39 +62,6 @@ def load_dataset(fasta_dir):
         records = SeqIO.parse(file_path, "fasta")
         num_proteins_current_file = fasta_count([file_path])
 
-        # TODO: add multiprocessing here for faster load times, even if it means
-        # moving tqdm to the file level...
-        # progress = 0
-        # num_workers = 70
-        # with tqdm(
-        #     bar_format="Progress: {postfix} | Elapsed: {elapsed} | {rate_fmt}",
-        #     postfix=progress,
-        # ) as t:
-        #     with ProcessPoolExecutor(max_workers=num_workers) as executor:
-        #         # Submit tasks and collect futures
-        #         futures = {
-        #             executor.submit(process_protein, (item, data.feature_extract)): i
-        #             for i, item in enumerate(records)
-        #         }
-
-        #         # Retrieve results as they complete
-        #         for future in as_completed(futures):
-        #             progress += 1
-        #             i = futures[future]
-        #             try:
-        #                 row = future.result()
-        #                 data.add_to_array(
-        #                     row, row_counter + i, cls_number, group_number
-        #                 )
-        #                 group_arr[row_counter + i] = group_number
-        #                 class_arr[row_counter + i] = cls_number
-
-        #             except Exception as e:
-        #                 print(f"Error processing item {i}: {e}")
-
-        # num_proteins_current_file = fasta_count([file_path])
-        # row_counter += num_proteins_current_file
-
         for _ in tqdm(range(num_proteins_current_file)):
             record = next(records)
             sequence = record.seq.__str__().upper()
@@ -144,10 +111,6 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
     num_classes = len(unique_classes)
     train_Y = np.eye(num_classes)[train_Y_index]
     val_Y = np.eye(num_classes)[val_Y_index]
-
-    print(train_Y)
-    print(train_Y_index)
-    print(train_X)
 
     # define hyperparameters
     feature_count = train_X.shape[1]
@@ -251,6 +214,12 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
             f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.4f}, Val Loss: {val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}"
         )
 
+        # Save best accuracy model
+        if val_accuracy > best_val_accuracy:
+            best_val_accuracy = val_accuracy
+            torch.save(model.state_dict(), model_path)
+            print(f"Model saved (best validation accuracy: {val_accuracy})")
+
         # Early stopping
         if val_loss <= best_val_loss - min_delta:
             best_val_loss = val_loss
@@ -263,12 +232,6 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
                 if patience_counter >= patience:
                     print("Early stopping")
                     break
-
-        # Save best accuracy model
-        if val_accuracy > best_val_accuracy:
-            best_val_accuracy = val_accuracy
-            torch.save(model.state_dict(), model_path)
-            print(f"Model saved (best validation accuracy: {val_accuracy})")
 
     return feature_count, num_classes
 
@@ -309,200 +272,3 @@ def initial_predict_pytorch(
     predicted_Y_index = np.argmax(predicted_Y, axis=1)
 
     return predicted_Y, predicted_Y_index
-
-    model.eval()
-    with torch.no_grad():
-        test_X_tensor = torch.FloatTensor(test_X)
-        test_Y_prediction_values = model(test_X_tensor).numpy()
-
-
-# def train_new_model(name, class_arr, group_arr, zscore_array, model_number):
-#     print(f"model {model_number}")
-#     train_X = zscore_array[(group_arr != model_number) & (group_arr != 11)]
-#     val_X = zscore_array[group_arr == model_number]
-#     test_X = zscore_array[group_arr == 11]
-
-#     train_Y_index = class_arr[(group_arr != model_number) & (group_arr != 11)]
-#     val_Y_index = class_arr[group_arr == model_number]
-#     test_Y = class_arr[group_arr == 11]
-
-#     feature_count = train_X.shape[1]
-#     unique_classes = sorted(np.unique(train_Y_index))
-#     num_classes = len(unique_classes)
-
-#     # These arrays basically OHE the class to columns. Instead of a bunch of class numbers, we have an array with a
-#     # single `1` on each row indicating the class.
-#     train_Y = np.eye(num_classes)[train_Y_index]  # TODO: Is this right??
-#     val_Y = np.eye(num_classes)[
-#         val_Y_index
-#     ]  # TODO: check that removing the -1 here fixed the indexing issue.
-
-#     print(train_Y)
-#     print(train_Y_index)
-#     print(train_X)
-
-#     es = EarlyStopping(
-#         monitor="loss", mode="min", verbose=2, patience=5, min_delta=0.02
-#     )
-
-#     val_model_path = str(
-#         (
-#             stored_models.get_model_dir(name)
-#             / f'model_files/val_{"{:02d}".format(model_number)}.h5'
-#         ).resolve()
-#     )
-
-#     mc = ModelCheckpoint(
-#         val_model_path,
-#         monitor="val_loss",
-#         mode="min",
-#         save_best_only=True,
-#         verbose=1,
-#     )
-
-#     acc_model_path = str(
-#         (
-#             stored_models.get_model_dir(name)
-#             / f'model_files/acc_{"{:02d}".format(model_number)}.h5'
-#         ).resolve()
-#     )
-
-#     mc2 = ModelCheckpoint(
-#         acc_model_path,
-#         monitor="val_accuracy",
-#         mode="max",
-#         save_best_only=True,
-#         verbose=1,
-#     )
-
-#     class_weights = compute_class_weight(
-#         class_weight="balanced", classes=np.unique(train_Y_index), y=train_Y_index
-#     )
-
-#     train_weights = dict(zip(np.unique(train_Y_index), class_weights))
-#     train_weights = {
-#         k: (v / sum(train_weights.values())) for k, v in train_weights.items()
-#     }
-
-#     print(class_weights)
-#     print(train_weights)
-
-#     model = Sequential()
-#     opt = Adam(
-#         learning_rate=0.001,
-#         beta_1=0.9,
-#         beta_2=0.999,
-#         amsgrad=False,
-#         epsilon=1e-08,
-#     )  # drop lr, maybe change beta_1&2
-#     # opt = SGD(learning_rate=0.001)
-#     # model.add(Input(shape=(feature_count,)))  # OMG is this the error??? Do I need to combine this layer with the next???
-#     model = Sequential(
-#         [
-#             Input(shape=(feature_count,)),
-#             Dense(
-#                 feature_count,
-#                 input_shape=(feature_count,),
-#                 kernel_initializer="random_uniform",
-#                 activation="relu",
-#             ),
-#             Dropout(0.2),
-#             Dense(200, activation="relu"),
-#             Dropout(0.2),
-#             Dense(200, activation="relu"),
-#             Dropout(0.2),
-#             Dense(num_classes, activation="softmax"),
-#         ]
-#     )
-#     # model.add(Input(shape=(feature_count,)))
-#     # model.add(
-#     #     Dense(
-#     #         feature_count,
-#     #         kernel_initializer="random_uniform",
-#     #         activation="relu",
-#     #     )
-#     # )
-#     # model.add(Dropout(0.2))
-#     # model.add(Dense(200, activation="relu"))
-#     # model.add(Dropout(0.2))
-#     # model.add(Dense(200, activation="relu"))
-#     # model.add(Dropout(0.2))
-#     # model.add(Dense(num_classes, activation="softmax"))
-#     model.compile(loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"])
-
-#     print(model.summary())
-
-#     history = model.fit(
-#         train_X,
-#         train_Y,
-#         validation_data=(val_X, val_Y),
-#         epochs=120,
-#         batch_size=5000,  # maybe set this to sqrt(size of dataset) ~700 ish, orig 5000
-#         verbose=2,
-#         class_weight=train_weights,
-#         callbacks=[es, mc, mc2],
-#         # callbacks=[es],
-#     )
-
-#     test_Y_prediction_values = model.predict(test_X)
-#     test_Y_predicted = list(np.argmax(test_Y_prediction_values, axis=1))
-#     print(test_Y_predicted)
-#     print(
-#         sum(
-#             [
-#                 1 if test_Y_predicted[i] == test_Y[i] else 0
-#                 for i in range(len(test_Y_predicted))
-#             ]
-#         )
-#         / len(test_Y_predicted)
-#     )
-
-#     model_path = str(
-#         (
-#             stored_models.get_model_dir(name)
-#             / f'model_files/{"{:02d}".format(model_number)}.keras'
-#         ).resolve()
-#     )
-#     model.save(model_path)
-
-#     # model_val = load_model(val_model_path)
-#     # test_Y_prediction_values_val = model.predict(test_X)
-#     # test_Y_predicted_val = np.argmax(test_Y_prediction_values_val, axis=1)
-
-#     # model_acc = load_model(acc_model_path)
-#     # test_Y_prediction_values_acc = model.predict(test_X)
-#     # test_Y_predicted_acc = np.argmax(test_Y_prediction_values_acc, axis=1)
-
-#     K.clear_session()
-#     del model
-#     tf.compat.v1.reset_default_graph()
-
-#     return
-
-
-# def initial_predict(model_name, zscore_array, group_arr, class_arr):
-#     test_X = zscore_array[group_arr == 11]
-#     test_Y_index = class_arr[group_arr == 11]
-
-#     y_hats = []
-
-#     stored_model_dir = stored_models.get_model_dir(model_name) / "model_files/"
-
-#     logging.getLogger("tensorflow").setLevel(logging.ERROR)
-#     print("Running initial model testing")
-#     for model_number in tqdm(range(1, 11)):
-#         model_full_name = f"{'{:02d}'.format(model_number)}.keras"
-#         model_path = stored_model_dir / model_full_name
-#         model = load_model(model_path)
-
-#         y_hat = model.predict(test_X, verbose=0)
-#         y_hats.append(y_hat)
-
-#         clear_session()
-#         del model
-#         del y_hat
-
-#     predicted_Y = np.sum(y_hats, axis=0)
-#     predicted_Y_index = np.argmax(predicted_Y, axis=1)
-
-#     return predicted_Y, predicted_Y_index

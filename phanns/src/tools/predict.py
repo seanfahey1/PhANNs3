@@ -1,4 +1,3 @@
-import logging
 import re
 import sys
 from pathlib import Path
@@ -13,8 +12,6 @@ from utils.data_handler import Data, fasta_count
 
 sys.path.append("..")
 
-# from tensorflow.keras.backend import clear_session
-# from tensorflow.keras.models import load_model
 from tools.model import SequentialNN
 from utils import stored_models
 from utils.data_handler import Data, fasta_count
@@ -103,29 +100,6 @@ def predict_pytorch(model_name, test_X, model_sizes):
     return predicted_Y, predicted_Y_index
 
 
-# def predict(model_name, test_X):
-#     logging.getLogger("tensorflow").setLevel(logging.ERROR)
-#     y_hats = []
-
-#     stored_model_dir = stored_models.get_model_dir(model_name) / "model_files/"
-#     print("Calculating predictions")
-
-#     for model_number in tqdm(range(1, 11)):
-#         model_full_name = f"{'{:02d}'.format(model_number)}.keras"
-#         model_path = stored_model_dir / model_full_name
-#         model = load_model(model_path)
-
-#         y_hat = model.predict(test_X, verbose=0)
-#         y_hats.append(y_hat)
-
-#         clear_session()
-
-#     predicted_Y = np.sum(y_hats, axis=0)
-#     predicted_Y_index = np.argmax(predicted_Y, axis=1)
-
-#     return predicted_Y, predicted_Y_index
-
-
 def write_prediction_outputs(
     output_file, predicted_Y, predicted_class, fasta_headers, sorted_group_names
 ):
@@ -169,9 +143,12 @@ def confusion_matrix(file_path, true_class, predicted_class):
         x=list(classes.keys()),
         y=list(classes.keys()),
         title="Confusion Matrix - Recall",
+        text_auto=".2f",
     ).update_layout(
         xaxis_title="Predicted Class",
         yaxis_title="True Class",
+        width=800,
+        height=800,
     )
 
     with open(file_path, "w") as output:
