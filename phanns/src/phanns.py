@@ -200,7 +200,7 @@ def train():
             p.dump(class_arr, m)
         with open("sorted_groups.cache", "wb") as m:
             p.dump(sorted_group_names, m)
-        with open("raw_data.cache.multithreaded", "wb") as m:
+        with open("raw_data.cache", "wb") as m:
             p.dump(data_array, m)
 
     else:

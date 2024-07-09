@@ -6,7 +6,7 @@ import numpy as np
 from Bio import SeqIO
 from tqdm import tqdm
 
-sys.path.append("..")
+sys.path.append("..")  # TODO: Do I need to do this for pip installable w/o pyx files?
 
 import numpy as np
 import torch
@@ -155,6 +155,7 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
     epochs = 120
     batch_size = 5000
     best_val_loss = float("inf")
+    best_val_accuracy = 0
     patience = 5
     min_delta = 0.02
     patience_counter = 0
