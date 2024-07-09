@@ -233,6 +233,7 @@ def train():
     #     time.sleep(2)
     #     gc.collect()
     # store_model_sizes(train_args.model_name, model_sizes)
+    model_sizes = retrieve_model_sizes(train_args.model_name)
 
     test_X = zscore_array[group_arr == 11]
     test_y = class_arr[group_arr == 11]
