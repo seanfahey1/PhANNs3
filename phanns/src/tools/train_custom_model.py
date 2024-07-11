@@ -1,9 +1,12 @@
 import re
 import sys
+from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
+import plotly.graph_objects as go
 from Bio import SeqIO
+from plotly.io import to_html
 from tqdm import tqdm
 
 sys.path.append("..")  # TODO: Do I need to do this for pip installable w/o pyx files?
@@ -150,6 +153,10 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
     val_dataset = TensorDataset(torch.FloatTensor(val_X), torch.LongTensor(val_Y_index))
     val_loader = DataLoader(val_dataset, batch_size=batch_size)
 
+    train_losses = defaultdict(list)
+    train_accs = defaultdict(list)
+    val_losses = defaultdict(list)
+    val_accs = defaultdict(list)
     # training loop
     scaler = GradScaler()
     for epoch in range(epochs):
@@ -205,10 +212,14 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
         val_loss /= len(val_loader)
         val_accuracy = val_correct / val_total
 
-        print(f"Epoch {epoch+1}/{epochs}")
+        print(f"Epoch {epoch+1}/{epochs}\tpatience={patience_counter}")
         print(
             f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.4f}, Val Loss: {val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}"
         )
+        train_accs[epoch].append(train_accuracy)
+        train_losses[epoch].append(train_loss)
+        val_accs[epoch].append(val_accuracy)
+        val_losses[epoch].append(val_loss)
 
         # Save best accuracy model
         if val_accuracy > best_val_accuracy:
@@ -226,7 +237,58 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
             if epoch >= break_in:
                 patience_counter += 1
                 if patience_counter >= patience:
-                    print("Early stopping")
+                    print("Early stopping\n")
                     break
-
+    plot_training_loss_acc(train_accs, train_losses, val_accs, val_losses)
     return feature_count, num_classes
+
+
+def plot_training_loss_acc(model_name, train_accs, train_losses, val_accs, val_losses):
+    file_path = Path(f"{model_name}_train_acc_loss.html")
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=list(train_accs.keys()),
+            y=list(train_accs.values()),
+            name="train accuracy",
+            mode="lines",
+            line=dict(color="royalblue"),
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=list(train_losses.keys()),
+            y=list(train_losses.values()),
+            name="train loss",
+            mode="lines",
+            line=dict(color="royalblue", dash="dash"),
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=list(val_accs.keys()),
+            y=list(val_accs.values()),
+            name="validation accuracy",
+            mode="lines",
+            line=dict(color="firebrick"),
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=list(val_losses.keys()),
+            y=list(val_losses.values()),
+            name="validation loss",
+            mode="lines",
+            line=dict(color="firebrick", dash="dash"),
+        )
+    )
+    fig.update_layout(
+        height=800,
+        width=800,
+        title="Train/Validation Acc/Loss per epoch",
+        xaxis_title="Epoch",
+        yaxis_title="value",
+    )
+    with open(file_path, "w") as output:
+        output.write(to_html(fig, include_plotlyjs="cdn"))
+    print(f"Accuracy and losses graph written to {Path(file_path).absolute()}")
