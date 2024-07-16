@@ -128,7 +128,10 @@ class Data:
             additional_biochemical_features.append(
                 (seq_quintile.count("D") + seq_quintile.count("E")) / len(seq_quintile)
             )  # basic fraction
-            additional_biochemical_features.append(np.mean(Xn.flexibility()))
+            mean_flexibility = np.mean(Xn.flexibility())
+            if np.isnan(mean_flexibility):
+                mean_flexibility = 1
+            additional_biochemical_features.append(mean_flexibility)
 
         additional_biochemical_features_array = np.asarray(
             additional_biochemical_features, dtype=np.float64

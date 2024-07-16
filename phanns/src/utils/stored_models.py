@@ -64,10 +64,54 @@ def load_stored_model(name: str):
     return model_paths, mean_arr, std_arr, sorted_group_names
 
 
+def load_cache(name: str):
+    saved_model_dir = get_model_dir(name)
+
+    with pq.ParquetFile(saved_model_dir / "arrays/output.parquet") as file:
+        data = [
+            next(file.iter_batches(batch_size=None)).column(i).to_numpy()
+            for i in range(file.num_columns)
+        ]
+    data_arr = np.column_stack(data)
+
+    with pq.ParquetFile(saved_model_dir / "arrays/zscore.parquet") as file:
+        data = [
+            next(file.iter_batches(batch_size=None)).column(i).to_numpy()
+            for i in range(file.num_columns)
+        ]
+    zscore_arr = np.column_stack(data)
+
+    with open(saved_model_dir / "arrays/arr.parquet", "rb") as file:
+        parquet_table = pq.read_table(file)
+        mean_arr = np.array(parquet_table["mean"])
+        std_arr = np.array(parquet_table["std"])
+
+    with open(saved_model_dir / "arrays/group_class_id_arr.parquet", "rb") as file:
+        parquet_table = pq.read_table(file)
+        group_arr = np.array(parquet_table["group"])
+        class_arr = np.array(parquet_table["class"])
+
+    with open(saved_model_dir / "arrays/class_names_arr.parquet", "rb") as file:
+        parquet_table = pq.read_table(file)
+        sorted_group_names = list(parquet_table["sorted_group_names"])
+
+    return (
+        mean_arr,
+        std_arr,
+        data_arr,
+        zscore_arr,
+        group_arr,
+        class_arr,
+        sorted_group_names,
+    )
+
+
 def store_newly_generated_model(
     name: str,
     std_arr: np.array,
     mean_arr: np.array,
+    data_arr: np.array,
+    zscore_arr: np.array,
     group_arr: np.array,
     class_arr: np.array,
     sorted_group_names: list,
@@ -86,10 +130,22 @@ def store_newly_generated_model(
             "mean": mean_arr,
         }
     )
+
+    data_table = pa.Table.from_arrays(
+        [pa.array(data_arr[:, i]) for i in range(data_arr.shape[1])],
+        names=[f"column_{i}" for i in range(data_arr.shape[1])],
+    )
+    zscore_table = pa.Table.from_arrays(
+        [pa.array(zscore_arr[:, i]) for i in range(zscore_arr.shape[1])],
+        names=[f"column_{i}" for i in range(zscore_arr.shape[1])],
+    )
+
     group_names_table = pa.table({"sorted_group_names": np.array(sorted_group_names)})
     group_class_table = pa.table({"group": group_arr, "class": class_arr})
 
     pq.write_table(parquet_table, array_dir / "arr.parquet")
+    pq.write_table(data_table, array_dir / "output.parquet")
+    pq.write_table(zscore_table, array_dir / "zscore.parquet")
     pq.write_table(group_names_table, array_dir / "class_names_arr.parquet")
     pq.write_table(group_class_table, array_dir / "group_class_id_arr.parquet")
 

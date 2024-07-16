@@ -239,7 +239,7 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
                 if patience_counter >= patience:
                     print("Early stopping\n")
                     break
-    plot_training_loss_acc(train_accs, train_losses, val_accs, val_losses)
+    plot_training_loss_acc(name, train_accs, train_losses, val_accs, val_losses)
     return feature_count, num_classes
 
 

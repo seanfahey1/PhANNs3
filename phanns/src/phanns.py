@@ -9,9 +9,10 @@ from tools import predict, train_custom_model
 # fmt: off
 gc.disable()
 sys.path.append("..")
-from utils.stored_models import (export_model, list_models, load_model,
-                                 load_stored_model, move_model, remove_model,
-                                 retrieve_model_sizes, store_model_sizes,
+from utils.stored_models import (export_model, list_models, load_cache,
+                                 load_model, load_stored_model, move_model,
+                                 remove_model, retrieve_model_sizes,
+                                 store_model_sizes,
                                  store_newly_generated_model, validate_model)
 
 # fmt: on
@@ -183,6 +184,8 @@ def train():
             train_args.model_name,
             stdev_array,
             mean_array,
+            data_array,
+            zscore_array,
             group_arr,
             class_arr,
             sorted_group_names,
@@ -206,20 +209,28 @@ def train():
 
     else:
         print("Loading from cache.")
-        with open("mean.cache", "rb") as m:
-            mean_array = p.load(m)
-        with open("stdev.cache", "rb") as m:
-            stdev_array = p.load(m)
-        with open("zscore.cache", "rb") as m:
-            zscore_array = p.load(m)
-        with open("group.cache", "rb") as m:
-            group_arr = p.load(m)
-        with open("class.cache", "rb") as m:
-            class_arr = p.load(m)
-        with open("sorted_groups.cache", "rb") as m:
-            sorted_group_names = p.load(m)
-        with open("raw_data.cache", "rb") as m:
-            data_array = p.load(m)
+        (
+            mean_array,
+            stdev_array,
+            data_array,
+            zscore_array,
+            group_arr,
+            class_arr,
+        ) = load_cache(train_args.model_name)
+        # with open("mean.cache", "rb") as m:
+        #     mean_array = p.load(m)
+        # with open("stdev.cache", "rb") as m:
+        #     stdev_array = p.load(m)
+        # with open("zscore.cache", "rb") as m:
+        #     zscore_array = p.load(m)
+        # with open("group.cache", "rb") as m:
+        #     group_arr = p.load(m)
+        # with open("class.cache", "rb") as m:
+        #     class_arr = p.load(m)
+        # with open("sorted_groups.cache", "rb") as m:
+        #     sorted_group_names = p.load(m)
+        # with open("raw_data.cache", "rb") as m:
+        #     data_array = p.load(m)
 
     model_sizes = dict()
 
