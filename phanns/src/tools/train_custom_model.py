@@ -153,10 +153,8 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
     val_dataset = TensorDataset(torch.FloatTensor(val_X), torch.LongTensor(val_Y_index))
     val_loader = DataLoader(val_dataset, batch_size=batch_size)
 
-    train_losses = defaultdict(list)
-    train_accs = defaultdict(list)
-    val_losses = defaultdict(list)
-    val_accs = defaultdict(list)
+    model_training_scores = defaultdict(list)
+
     # training loop
     scaler = GradScaler()
     for epoch in range(epochs):
@@ -216,10 +214,10 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
         print(
             f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.4f}, Val Loss: {val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}"
         )
-        train_accs[epoch].append(train_accuracy)
-        train_losses[epoch].append(train_loss)
-        val_accs[epoch].append(val_accuracy)
-        val_losses[epoch].append(val_loss)
+        model_training_scores["val_acc"].append(val_accuracy)
+        model_training_scores["val_loss"].append(val_loss)
+        model_training_scores["train_acc"].append(train_accuracy)
+        model_training_scores["train_loss"].append(train_loss)
 
         # Save best accuracy model
         if val_accuracy > best_val_accuracy:
@@ -239,56 +237,63 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
                 if patience_counter >= patience:
                     print("Early stopping\n")
                     break
-    plot_training_loss_acc(name, train_accs, train_losses, val_accs, val_losses)
-    return feature_count, num_classes
+
+    return feature_count, num_classes, model_training_scores
 
 
-def plot_training_loss_acc(model_name, train_accs, train_losses, val_accs, val_losses):
+def plot_training_loss_acc(model_name, model_training_scores_dict: dict):
     file_path = Path(f"{model_name}_train_acc_loss.html")
     fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-            x=list(train_accs.keys()),
-            y=list(train_accs.values()),
-            name="train accuracy",
-            mode="lines",
-            line=dict(color="royalblue"),
+    for model, model_values in model_training_scores_dict.items():
+        train_acc = model_values["train_acc"]
+        fig.add_trace(
+            go.Scatter(
+                x=[i for i in range(len(train_acc))],
+                y=train_acc,
+                name=f"model {model}-train accuracy",
+                mode="lines",
+                line=dict(color="royalblue"),
+            )
         )
-    )
-    fig.add_trace(
-        go.Scatter(
-            x=list(train_losses.keys()),
-            y=list(train_losses.values()),
-            name="train loss",
-            mode="lines",
-            line=dict(color="royalblue", dash="dash"),
+        train_loss = model_values["train_loss"]
+        fig.add_trace(
+            go.Scatter(
+                x=[i for i in range(len(train_loss))],
+                y=train_loss,
+                name=f"model {model}-train loss",
+                mode="lines",
+                line=dict(color="royalblue", dash="dash"),
+            )
         )
-    )
-    fig.add_trace(
-        go.Scatter(
-            x=list(val_accs.keys()),
-            y=list(val_accs.values()),
-            name="validation accuracy",
-            mode="lines",
-            line=dict(color="firebrick"),
+        val_acc = model_values["val_acc"]
+        fig.add_trace(
+            go.Scatter(
+                x=[i for i in range(len(val_acc))],
+                y=val_acc,
+                name=f"model {model}-validation accuracy",
+                mode="lines",
+                line=dict(color="firebrick"),
+            )
         )
-    )
-    fig.add_trace(
-        go.Scatter(
-            x=list(val_losses.keys()),
-            y=list(val_losses.values()),
-            name="validation loss",
-            mode="lines",
-            line=dict(color="firebrick", dash="dash"),
+        val_loss = model_values["val_loss"]
+        fig.add_trace(
+            go.Scatter(
+                x=[i for i in range(len(val_loss))],
+                y=val_loss,
+                name=f"model {model}-validation loss",
+                mode="lines",
+                line=dict(color="firebrick", dash="dash"),
+            )
         )
-    )
     fig.update_layout(
         height=800,
         width=800,
-        title="Train/Validation Acc/Loss per epoch",
+        title="Train/Validation Acc/Loss per epoch, per model",
         xaxis_title="Epoch",
         yaxis_title="value",
     )
+
     with open(file_path, "w") as output:
         output.write(to_html(fig, include_plotlyjs="cdn"))
+
     print(f"Accuracy and losses graph written to {Path(file_path).absolute()}")

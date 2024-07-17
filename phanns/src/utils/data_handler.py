@@ -13,8 +13,8 @@ from utils import count_substrings as count
 
 class Data:
     def __init__(self, protein_count):
-        self.arr = np.empty((protein_count, 11235), dtype=np.float64)
-        # self.arr = np.empty((protein_count, 11201), dtype=np.float64)
+        num_features = len(self.feature_extract("A" * 100))
+        self.arr = np.empty((protein_count, num_features), dtype=np.float64)
         self.class_arr = np.empty(protein_count, dtype=int)
         self.group_arr = np.empty(protein_count, dtype=int)
         self.id_arr = np.empty(protein_count, dtype=int)

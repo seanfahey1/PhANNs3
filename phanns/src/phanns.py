@@ -235,14 +235,26 @@ def train():
     model_sizes = dict()
 
     print("Starting model training step.")
+    model_training_scores = dict()
     for model_number in range(1, 11):
-        feature_count, num_classes = train_custom_model.train_new_pytorch_model(
+        (
+            feature_count,
+            num_classes,
+            single_model_training_scores,
+        ) = train_custom_model.train_new_pytorch_model(
             train_args.model_name, class_arr, group_arr, zscore_array, model_number
         )
         model_sizes[model_number] = (feature_count, num_classes)
+        model_training_scores[model_number] = single_model_training_scores
 
         time.sleep(2)
         gc.collect()
+
+    train_custom_model.plot_training_loss_acc(
+        model_name=train_args.model_name,
+        model_training_scores_dict=model_training_scores,
+    )
+
     store_model_sizes(train_args.model_name, model_sizes)
     model_sizes = retrieve_model_sizes(train_args.model_name)
 
