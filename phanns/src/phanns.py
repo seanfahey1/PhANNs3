@@ -9,6 +9,7 @@ from tools import predict, train_custom_model
 # fmt: off
 gc.disable()
 sys.path.append("..")
+from utils import gaussian_confidence
 from utils.stored_models import (export_model, list_models, load_cache,
                                  load_model, load_stored_model, move_model,
                                  remove_model, retrieve_model_sizes,
@@ -281,6 +282,11 @@ def train():
         predicted_class,
         sorted_group_names,
         true_class,
+    )
+
+    gaussian_confidence.calculate_gaussian_confidence(
+        f"{train_args.model_name}_initial_results.csv",
+        model_name=train_args.model_name,
     )
 
     predict.confusion_matrix(

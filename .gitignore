@@ -112,9 +112,11 @@ venv.bak/
 *.c
 simple_dataset/
 test_dataset/
+testing/
 .vscode
 *.so
 __pycache__
 build/
 model_files/
 *.csv
+*.html
