@@ -1,12 +1,14 @@
 import sys
+from datetime import datetime
 from itertools import islice
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import plotly.express as px
+import plotly.graph_objects as go
 import pyarrow as pa
 import pyarrow.parquet as pq
+from plotly.io import to_html
 from scipy.stats import norm
 from utils.stored_models import get_model_dir
 
@@ -100,6 +102,8 @@ def calculate_confidence_scores(tp_gaussian_weights, fp_gaussian_weights, x_valu
 def initial_gaussian_confidences(predictions_path: Path, model_name: str):
     assert predictions_path.exists(), f"File not found: {predictions_path}"
 
+    html = ""
+
     df = pd.read_csv(predictions_path)
     classes = list(df.columns[1:-1])
     tp_gaussian_weights_dict = {}
@@ -156,13 +160,59 @@ def initial_gaussian_confidences(predictions_path: Path, model_name: str):
         fp_gaussian_weights_dict[class_name] = fp_gaussian_weights
         confidence_scores[class_name] = gaussian_confidences
 
-        px.line(
-            x=list(range(len(confidence_scores[class_name]))),
-            y=confidence_scores[class_name],
-            width=600,
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=[x / 100 for x in range(len(confidence_scores[class_name]))],
+                y=confidence_scores[class_name],
+                mode="lines",
+                name="Confidence Scores",
+            )
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=[x / 100 for x in range(len(tp_gaussian_weights_dict[class_name]))],
+                y=tp_gaussian_weights_dict[class_name],
+                mode="lines",
+                name="TP-scores",
+                yaxis="y2",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=[x / 100 for x in range(len(confidence_scores[class_name]))],
+                y=fp_gaussian_weights_dict[class_name],
+                mode="lines",
+                name="FP-scores",
+                yaxis="y3",
+            )
+        )
+
+        fig.update_layout(
+            title=f"<b>{class_name} confidence scores</b><br><i>Radius: {radius:.3f}\tSign changes: {sign_changes}</i>",
+            yaxis_title="Confidence Score",
+            xaxis_title="PhANNs Score",
+            width=1000,
             height=600,
-            title=f"{class_name} confidence scores",
-        ).show()
+            xaxis=dict(domain=[0, 0.9]),
+            yaxis2=dict(
+                title="TP-scores",
+                anchor="free",
+                overlaying="y",
+                side="right",
+                position=0.9,
+            ),
+            yaxis3=dict(
+                title="FP-scores",
+                anchor="free",
+                overlaying="y",
+                side="right",
+                position=1,
+            ),
+        )
+
+        html += to_html(fig, include_plotlyjs="cdn")
 
     write_parquet_table(
         model_name,
@@ -170,6 +220,10 @@ def initial_gaussian_confidences(predictions_path: Path, model_name: str):
         fp_gaussian_weights_dict,
         confidence_scores,
     )
+    with open(
+        f"{model_name}_{datetime.now().isoformat()}_confidence_plots.html", "w"
+    ) as f:
+        f.write(html)
 
 
 def assign_confidences(
