@@ -190,11 +190,16 @@ def assign_confidences(
     )
     confidence_scores_dict = confidence_scores_table.to_pydict()
 
+    print(prediction_scores)
+    print(prediction_scores.shape)
+
     assigned_confidences = []
     for i in range(len(prediction_scores)):
         class_name = predicted_class[i]
-        class_score = float(prediction_scores[i])
-        class_score_index = int(round(class_score, 3) * 1000)
+        class_scores = prediction_scores[i]
+        top_class_score = max(class_scores)
+
+        class_score_index = int(round(top_class_score, 3) * 1000)
         confidence_score = confidence_scores_dict[class_name][class_score_index]
         assigned_confidences.append(confidence_score)
 
