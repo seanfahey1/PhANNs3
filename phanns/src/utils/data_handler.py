@@ -27,6 +27,8 @@ class Data:
         self.tetra_sc = ["".join(i) for i in itertools.product(SC, repeat=4)]
 
         num_features = len(self.feature_extract("A" * 100))
+        print(f"Initializing Data object with {num_features} features")
+
         self.arr = np.empty((protein_count, num_features), dtype=np.float64)
         self.class_arr = np.empty(protein_count, dtype=int)
         self.group_arr = np.empty(protein_count, dtype=int)
