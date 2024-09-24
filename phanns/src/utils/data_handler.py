@@ -17,12 +17,6 @@ class Data:
         sc = "11111222233455566777"
         self.sc_translator = aa.maketrans(aa, sc)
 
-        num_features = len(self.feature_extract("A" * 100))
-        self.arr = np.empty((protein_count, num_features), dtype=np.float64)
-        self.class_arr = np.empty(protein_count, dtype=int)
-        self.group_arr = np.empty(protein_count, dtype=int)
-        self.id_arr = np.empty(protein_count, dtype=int)
-
         AA = sorted([x for x in aa])
         SC = ["1", "2", "3", "4", "5", "6", "7"]
 
@@ -31,6 +25,12 @@ class Data:
         self.di_sc = ["".join(i) for i in itertools.product(SC, repeat=2)]
         self.tri_sc = ["".join(i) for i in itertools.product(SC, repeat=3)]
         self.tetra_sc = ["".join(i) for i in itertools.product(SC, repeat=4)]
+
+        num_features = len(self.feature_extract("A" * 100))
+        self.arr = np.empty((protein_count, num_features), dtype=np.float64)
+        self.class_arr = np.empty(protein_count, dtype=int)
+        self.group_arr = np.empty(protein_count, dtype=int)
+        self.id_arr = np.empty(protein_count, dtype=int)
 
     def feature_extract(self, raw_sequence):
         sequence = (
