@@ -9,7 +9,8 @@ from tools import predict, train_custom_model
 # fmt: off
 gc.disable()
 sys.path.append("..")
-from utils import gaussian_confidence
+from utils.gaussian_confidence import (assign_confidences,
+                                       initial_gaussian_confidences)
 from utils.stored_models import (export_model, list_models, load_cache,
                                  load_model, load_stored_model, move_model,
                                  remove_model, retrieve_model_sizes,
@@ -284,7 +285,7 @@ def train():
         true_class,
     )
 
-    gaussian_confidence.calculate_gaussian_confidence(
+    initial_gaussian_confidences.calculate_gaussian_confidence(
         f"{train_args.model_name}_initial_results.csv",
         model_name=train_args.model_name,
     )
@@ -320,12 +321,19 @@ def classify():
     class_number_assignments = {i: x for i, x in enumerate(sorted_group_names)}
 
     predicted_class = [class_number_assignments[x] for x in prediction]
+
+    print("Calculating confidence scores")
+    confidence_scores = assign_confidences(
+        prediction_scores, predicted_class, classify_args.model_name
+    )
+
     predict.write_prediction_outputs(
         classify_args.output_file,
         prediction_scores,
         predicted_class,
         fasta_headers,
         sorted_group_names,
+        confidence_scores,
     )
 
 

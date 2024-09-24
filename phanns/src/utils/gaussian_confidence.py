@@ -1,3 +1,4 @@
+import sys
 from itertools import islice
 from pathlib import Path
 
@@ -7,7 +8,8 @@ import plotly.express as px
 import pyarrow as pa
 import pyarrow.parquet as pq
 from scipy.stats import norm
-from utils.stored_models import get_model_dir
+
+# from utils.stored_models import get_model_dir
 
 
 def write_parquet_table(
@@ -16,7 +18,8 @@ def write_parquet_table(
     fp_gaussian_weights_dict: dict,
     confidence_scores: dict,
 ):
-    saved_model_dir = get_model_dir(model_name)
+    # saved_model_dir = get_model_dir(model_name)
+    saved_model_dir = Path("testing/")
 
     confidence_scores_dir = saved_model_dir / "confidence_scores"
     confidence_scores_dir.mkdir(exist_ok=True, parents=True)
@@ -95,7 +98,7 @@ def calculate_confidence_scores(tp_gaussian_weights, fp_gaussian_weights, x_valu
     return confidence_scores
 
 
-def gaussian_confidences(predictions_path: Path, model_name: str):
+def initial_gaussian_confidences(predictions_path: Path, model_name: str):
     assert predictions_path.exists(), f"File not found: {predictions_path}"
 
     df = pd.read_csv(predictions_path)
@@ -105,15 +108,38 @@ def gaussian_confidences(predictions_path: Path, model_name: str):
     confidence_scores = {}
 
     for class_name in classes:
+        print(f"Calculating confidence scores for class: {class_name}")
         radius = 0.05
         while True:
             tp_scores = get_TP_scores(df, class_name)
+            if len(tp_scores) == 0:
+                tp_gaussian_weights = np.zeros(1000)
+                fp_gaussian_weights = np.ones(1000)
+                gaussian_confidences = np.zeros(1000)
+                break
+            else:
+                tp_gaussian_weights, x_values = calculate_point_weights(
+                    tp_scores, radius
+                )
 
-            tp_gaussian_weights, x_values = calculate_point_weights(tp_scores, radius)
+            fp_scores = get_FP_scores(df, class_name)
+            if len(fp_scores) == 0:
+                tp_gaussian_weights = np.ones(1000)
+                fp_gaussian_weights = np.zeros(1000)
+                gaussian_confidences = np.ones(1000)
+                break
+            else:
+                fp_gaussian_weights, x_values = calculate_point_weights(
+                    fp_scores, radius
+                )
 
-            sign_changes = count_sign_changes(tp_gaussian_weights)
-            title_str = f"TP -- class: {class_name:<6}radius: {radius:<6.3f} sign_changes: {sign_changes}"
-            radius += 0.005
+            gaussian_confidences = calculate_confidence_scores(
+                tp_gaussian_weights, fp_gaussian_weights, x_values
+            )
+
+            sign_changes = count_sign_changes(gaussian_confidences)
+
+            title_str = f"class: {class_name:<6}radius: {radius:<6.3f} sign_changes: {sign_changes}"
             if sign_changes <= 2:
                 # px.line(
                 #     x=x_values,
@@ -122,45 +148,61 @@ def gaussian_confidences(predictions_path: Path, model_name: str):
                 #     height=600,
                 #     title=title_str,
                 # ).show()
-                tp_gaussian_weights_dict[class_name] = tp_gaussian_weights
+
                 print(title_str)
                 break
-
-        while True:
-            fp_scores = get_FP_scores(df, class_name)
-
-            fp_gaussian_weights, x_values = calculate_point_weights(fp_scores, radius)
-
-            sign_changes = count_sign_changes(fp_gaussian_weights)
-            title_str = f"FP -- class: {class_name:<6}radius: {radius:<6.3f} sign_changes: {sign_changes}"
             radius += 0.005
-            if sign_changes <= 2:
-                # px.line(
-                #     x=x_values,
-                #     y=fp_gaussian_weights,
-                #     width=600,
-                #     height=600,
-                #     title=title_str,
-                # ).show()
-                fp_gaussian_weights_dict[class_name] = fp_gaussian_weights
-                print(title_str)
-                break
 
-        confidence_scores[class_name] = calculate_confidence_scores(
-            tp_gaussian_weights, fp_gaussian_weights, x_values
-        )
-        # px.scatter(
-        #     x=list(range(len(confidence_scores[class_name]))),
-        #     y=confidence_scores[class_name],
-        #     width=600,
-        #     height=600,
-        #     title = f"{class_name} confidence scores"
-        #     ).show()
+        tp_gaussian_weights_dict[class_name] = tp_gaussian_weights
+        fp_gaussian_weights_dict[class_name] = fp_gaussian_weights
+        confidence_scores[class_name] = gaussian_confidences
+
+        px.line(
+            x=list(range(len(confidence_scores[class_name]))),
+            y=confidence_scores[class_name],
+            width=600,
+            height=600,
+            title=f"{class_name} confidence scores",
+        ).show()
 
     write_parquet_table(
         model_name,
         tp_gaussian_weights_dict,
         fp_gaussian_weights_dict,
         confidence_scores,
-        Path("testing/"),
+    )
+
+
+def assign_confidences(
+    prediction_scores: np.array, predicted_class: list, confidence_scores_dir: Path
+):
+    assert (
+        confidence_scores_dir.exists() & confidence_scores_dir.is_dir()
+    ), f"Directory not found: {confidence_scores_dir}"
+    assert (
+        confidence_scores_dir / "class_confidence_scores.parquet"
+    ).exists(), (
+        f"File not found: {confidence_scores_dir / 'class_confidence_scores.parquet'}"
+    )
+
+    confidence_scores_table = pq.read_table(
+        confidence_scores_dir / "class_confidence_scores.parquet"
+    )
+    confidence_scores_dict = confidence_scores_table.to_pydict()
+
+    assigned_confidences = []
+    for i in range(len(prediction_scores)):
+        class_name = predicted_class[i]
+        class_score = float(prediction_scores[i])
+        class_score_index = int(round(class_score, 3) * 1000)
+        confidence_score = confidence_scores_dict[class_name][class_score_index]
+        assigned_confidences.append(confidence_score)
+
+    return assigned_confidences
+
+
+if __name__ == "__main__":
+    initial_gaussian_confidences(
+        Path("testing/2024_step1_dataset_final_model-24jul12_initial_results.csv"),
+        "testing",
     )
