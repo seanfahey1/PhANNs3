@@ -202,7 +202,7 @@ def assign_confidences(
         except IndexError as e:
             print(class_score_index, len(confidence_scores_dict[class_name]))
             raise e
-        assigned_confidences.append(confidence_score)
+        assigned_confidences.append(round(confidence_score, 3))
 
     return assigned_confidences
 
