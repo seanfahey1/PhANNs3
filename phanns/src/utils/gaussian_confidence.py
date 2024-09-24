@@ -200,7 +200,11 @@ def assign_confidences(
         top_class_score = max(class_scores)
 
         class_score_index = int(round(top_class_score, 3) * 1000)
-        confidence_score = confidence_scores_dict[class_name][class_score_index]
+        try:
+            confidence_score = confidence_scores_dict[class_name][class_score_index]
+        except IndexError as e:
+            print(class_score_index, len(confidence_scores_dict[class_name]))
+            raise e
         assigned_confidences.append(confidence_score)
 
     return assigned_confidences
