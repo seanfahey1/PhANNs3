@@ -8,8 +8,7 @@ import plotly.express as px
 import pyarrow as pa
 import pyarrow.parquet as pq
 from scipy.stats import norm
-
-# from utils.stored_models import get_model_dir
+from utils.stored_models import get_model_dir
 
 
 def write_parquet_table(
@@ -18,8 +17,8 @@ def write_parquet_table(
     fp_gaussian_weights_dict: dict,
     confidence_scores: dict,
 ):
-    # saved_model_dir = get_model_dir(model_name)
-    saved_model_dir = Path("testing/")
+    saved_model_dir = get_model_dir(model_name)
+    # saved_model_dir = Path("testing/")
 
     confidence_scores_dir = saved_model_dir / "confidence_scores"
     confidence_scores_dir.mkdir(exist_ok=True, parents=True)
@@ -174,8 +173,9 @@ def initial_gaussian_confidences(predictions_path: Path, model_name: str):
 
 
 def assign_confidences(
-    prediction_scores: np.array, predicted_class: list, confidence_scores_dir: Path
+    prediction_scores: np.array, predicted_class: list, model_name: str
 ):
+    confidence_scores_dir = get_model_dir(model_name) / "confidence_scores"
     assert (
         confidence_scores_dir.exists() & confidence_scores_dir.is_dir()
     ), f"Directory not found: {confidence_scores_dir}"
@@ -201,8 +201,8 @@ def assign_confidences(
     return assigned_confidences
 
 
-if __name__ == "__main__":
-    initial_gaussian_confidences(
-        Path("testing/2024_step1_dataset_final_model-24jul12_initial_results.csv"),
-        "testing",
-    )
+# if __name__ == "__main__":
+#     initial_gaussian_confidences(
+#         Path("testing/2024_step1_dataset_final_model-24jul12_initial_results.csv"),
+#         "testing",
+#     )
