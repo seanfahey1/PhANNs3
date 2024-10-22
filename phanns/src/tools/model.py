@@ -5,13 +5,14 @@ class SequentialNN(nn.Module):
     def __init__(self, feature_count, num_classes):
         super(SequentialNN, self).__init__()
         self.model = nn.Sequential(
+            nn.Dropout(0.2),
             nn.Linear(feature_count, feature_count),
             nn.ReLU(),
             nn.Dropout(0.2),
-            nn.Linear(feature_count, 200),
+            nn.Linear(feature_count, 2000),
             nn.ReLU(),
             nn.Dropout(0.2),
-            nn.Linear(200, 200),
+            nn.Linear(2000, 200),
             nn.ReLU(),
             nn.Dropout(0.2),
             nn.Linear(200, num_classes),
