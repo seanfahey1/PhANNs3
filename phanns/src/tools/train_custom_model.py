@@ -11,6 +11,8 @@ from tqdm import tqdm
 
 sys.path.append("..")  # TODO: Do I need to do this for pip installable w/o pyx files?
 
+import concurrent.futures
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -54,6 +56,14 @@ def load_dataset(fasta_dir):
     group_arr = np.zeros(num_proteins, dtype=int)
     class_arr = np.zeros(num_proteins, dtype=int)
 
+    def process_sequence(record, data, row_counter, cls_number, group_number):
+        sequence = record.seq.__str__().upper()
+        row = data.feature_extract(sequence)
+        data.add_to_array(row, row_counter, cls_number, group_number)
+
+        group_arr[row_counter] = group_number
+        class_arr[row_counter] = cls_number
+
     for file_path in fastas:
         match = re.search(re_pattern, file_path.stem)
         cls = match.group("name")
@@ -64,17 +74,28 @@ def load_dataset(fasta_dir):
 
         records = SeqIO.parse(file_path, "fasta")
         num_proteins_current_file = fasta_count([file_path])
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = []
+            print("Building process pool")
+            for _ in tqdm(range(num_proteins_current_file)):
+                record = next(records)
+                future = executor.submit(
+                    process_sequence,
+                    record,
+                    data,
+                    row_counter,
+                    cls_number,
+                    group_number,
+                )
+                futures.append(future)
+                row_counter += 1
 
-        for _ in tqdm(range(num_proteins_current_file)):
-            record = next(records)
-            sequence = record.seq.__str__().upper()
-            row = data.feature_extract(sequence)
-            data.add_to_array(row, row_counter, cls_number, group_number)
-
-            group_arr[row_counter] = group_number
-            class_arr[row_counter] = cls_number
-
-            row_counter += 1
+            print("Executing process pool")
+            for future in tqdm(
+                concurrent.futures.as_completed(futures),
+                total=num_proteins_current_file,
+            ):
+                future.result()
 
     print("Calculating z-score normalization")
     mean_array, stdev_array, zscore_array = calc.zscore(data.arr)
