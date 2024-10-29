@@ -71,7 +71,7 @@ def load_cache(name: str):
         schema = file.schema
         data = [
             next(file.iter_batches(batch_size=None)).column(i).to_numpy()
-            for i in range(schema.num_columns)
+            for i in range(len(schema.names))
         ]
     data_arr = np.column_stack(data)
 
@@ -79,7 +79,7 @@ def load_cache(name: str):
         schema = file.schema
         data = [
             next(file.iter_batches(batch_size=None)).column(i).to_numpy()
-            for i in range(schema.num_columns)
+            for i in range(len(schema.names))
         ]
     zscore_arr = np.column_stack(data)
 
