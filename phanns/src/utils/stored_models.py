@@ -67,21 +67,28 @@ def load_stored_model(name: str):
 def load_cache(name: str):
     saved_model_dir = get_model_dir(name)
 
-    with pq.ParquetFile(saved_model_dir / "arrays/output.parquet") as file:
-        schema = file.schema
-        data = [
-            next(file.iter_batches(batch_size=None)).column(i).to_numpy()
-            for i in range(len(schema.names))
-        ]
-    data_arr = np.column_stack(data)
+    with open(saved_model_dir / "arrays/output.parquet", "rb") as file:
+        parquet_table = pq.read_table(file)
+    data_arr = [parquet_table[x] for x in parquet_table.column_names]
 
-    with pq.ParquetFile(saved_model_dir / "arrays/zscore.parquet") as file:
-        schema = file.schema
-        data = [
-            next(file.iter_batches(batch_size=None)).column(i).to_numpy()
-            for i in range(len(schema.names))
-        ]
-    zscore_arr = np.column_stack(data)
+    with open(saved_model_dir / "arrays/zscore.parquet", "rb") as file:
+        parquet_table = pq.read_table(file)
+    zscore_arr = [parquet_table[x] for x in parquet_table.column_names]
+
+    # with pq.ParquetFile(saved_model_dir / "arrays/output.parquet") as file:
+    #     data = file.read()
+    #     data = [
+    #         next(file.iter_batches(batch_size=None)).column(i).to_numpy()
+    #         for i in range(file.num_columns)
+    #     ]
+    # data_arr = np.column_stack(data)
+
+    # with pq.ParquetFile(saved_model_dir / "arrays/zscore.parquet") as file:
+    #     data = [
+    #         next(file.iter_batches(batch_size=None)).column(i).to_numpy()
+    #         for i in range(file.num_columns)
+    #     ]
+    # zscore_arr = np.column_stack(data)
 
     with open(saved_model_dir / "arrays/arr.parquet", "rb") as file:
         parquet_table = pq.read_table(file)
