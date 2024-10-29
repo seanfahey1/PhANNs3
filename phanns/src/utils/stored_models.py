@@ -102,7 +102,7 @@ def load_cache(name: str):
 
     with open(saved_model_dir / "arrays/class_names_arr.parquet", "rb") as file:
         parquet_table = pq.read_table(file)
-        sorted_group_names = list(parquet_table["sorted_group_names"])
+        sorted_group_names = [str(x) for x in parquet_table["sorted_group_names"]]
 
     return (
         mean_arr,
