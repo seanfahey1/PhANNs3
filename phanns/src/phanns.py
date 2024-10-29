@@ -3,6 +3,7 @@ import gc
 import pickle as p
 import sys
 import time
+from pathlib import Path
 
 from tools import predict, train_custom_model
 
@@ -287,7 +288,7 @@ def train():
     )
 
     initial_gaussian_confidences(
-        f"{train_args.model_name}_initial_results.csv",
+        Path(f"{train_args.model_name}_initial_results.csv"),
         model_name=train_args.model_name,
     )
 
