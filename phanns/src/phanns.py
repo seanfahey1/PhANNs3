@@ -285,7 +285,7 @@ def train():
         true_class,
     )
 
-    initial_gaussian_confidences.calculate_gaussian_confidence(
+    initial_gaussian_confidences(
         f"{train_args.model_name}_initial_results.csv",
         model_name=train_args.model_name,
     )
