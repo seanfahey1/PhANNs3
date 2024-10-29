@@ -69,11 +69,11 @@ def load_cache(name: str):
 
     with open(saved_model_dir / "arrays/output.parquet", "rb") as file:
         parquet_table = pq.read_table(file)
-    data_arr = [parquet_table[x] for x in parquet_table.column_names]
+    data_arr = np.column_stack([parquet_table[x] for x in parquet_table.column_names])
 
     with open(saved_model_dir / "arrays/zscore.parquet", "rb") as file:
         parquet_table = pq.read_table(file)
-    zscore_arr = [parquet_table[x] for x in parquet_table.column_names]
+    zscore_arr = np.column_stack([parquet_table[x] for x in parquet_table.column_names])
 
     # with pq.ParquetFile(saved_model_dir / "arrays/output.parquet") as file:
     #     data = file.read()
