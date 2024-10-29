@@ -218,6 +218,7 @@ def train():
             zscore_array,
             group_arr,
             class_arr,
+            sorted_group_names,
         ) = load_cache(train_args.model_name)
         # with open("mean.cache", "rb") as m:
         #     mean_array = p.load(m)
