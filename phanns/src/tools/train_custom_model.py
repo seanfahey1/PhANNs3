@@ -151,10 +151,12 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
     )
     print(
         "\t".join(
-            f"Learning rate: {learning_rate}",
-            f"patience: {patience}",
-            f"break_in: {break_in}",
-            f"min_delta: {min_delta}",
+            [
+                f"Learning rate: {learning_rate}",
+                f"patience: {patience}",
+                f"break_in: {break_in}",
+                f"min_delta: {min_delta}",
+            ]
         )
     )
 
