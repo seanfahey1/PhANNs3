@@ -239,6 +239,7 @@ def train():
     model_sizes = dict()
 
     print("Starting model training step.")
+    sys.stdout.flush()
     model_training_scores = dict()
     for model_number in range(1, 11):
         (

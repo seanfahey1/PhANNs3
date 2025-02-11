@@ -140,8 +140,8 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
     best_val_loss = float("inf")
     best_val_accuracy = 0
     patience = 10
-    break_in = 15
-    min_delta = 0.02
+    break_in = 25
+    min_delta = 0.005
     patience_counter = 0
     model_path = str(
         (
@@ -249,6 +249,7 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
         model_training_scores["val_loss"].append(val_loss)
         model_training_scores["train_acc"].append(train_accuracy)
         model_training_scores["train_loss"].append(train_loss)
+        sys.stdout.flush()
 
         # Save best accuracy model
         if val_accuracy > best_val_accuracy:
@@ -258,6 +259,9 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
 
         # Early stopping
         if val_loss <= best_val_loss - min_delta:
+            print(
+                f"Validation loss decreased over threshold ({best_val_loss:.4f} --> {val_loss:.4f})."
+            )
             best_val_loss = val_loss
             patience_counter = 0
             # torch.save(model.state_dict(), val_model_path)
@@ -268,6 +272,7 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
                 if patience_counter >= patience:
                     print("Early stopping\n")
                     break
+        sys.stdout.flush()
 
     return feature_count, num_classes, model_training_scores
 
