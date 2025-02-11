@@ -141,7 +141,7 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
     best_val_accuracy = 0
     patience = 10
     break_in = 25
-    min_delta = 0.005
+    min_delta = 0.001
     patience_counter = 0
     model_path = str(
         (
