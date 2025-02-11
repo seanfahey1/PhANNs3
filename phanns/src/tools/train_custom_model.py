@@ -134,13 +134,13 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
 
     # define hyperparameters
     feature_count = train_X.shape[1]
-    learning_rate = 0.00001
+    learning_rate = 0.000005
     epochs = 120
     batch_size = 5000
     best_val_loss = float("inf")
     best_val_accuracy = 0
-    patience = 5
-    break_in = 5
+    patience = 10
+    break_in = 15
     min_delta = 0.02
     patience_counter = 0
     model_path = str(
@@ -148,6 +148,14 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
             stored_models.get_model_dir(name)
             / f'model_files/{"{:02d}".format(model_number)}.pt'
         ).resolve()
+    )
+    print(
+        "\t".join(
+            f"Learning rate: {learning_rate}",
+            f"patience: {patience}",
+            f"break_in: {break_in}",
+            f"min_delta: {min_delta}",
+        )
     )
 
     # class weights
