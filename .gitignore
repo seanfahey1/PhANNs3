@@ -107,5 +107,16 @@ venv.bak/
 #
 *.png
 *.tar
+*.tar.gz
 *.fasta
 *.c
+simple_dataset/
+test_dataset/
+testing/
+.vscode
+*.so
+__pycache__
+build/
+model_files/
+*.csv
+*.html
