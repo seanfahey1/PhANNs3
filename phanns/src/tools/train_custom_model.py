@@ -20,7 +20,7 @@ import torch.optim as optim
 from sklearn.utils.class_weight import compute_class_weight
 from tools.model import SequentialNN
 from torch.cuda.amp import GradScaler, autocast
-from torch.utils.data import DataLoader, TensorDataset, WeightedRandomSampler
+from torch.utils.data import DataLoader, TensorDataset
 from utils import calc, stored_models
 from utils.data_handler import Data, fasta_count
 
@@ -161,13 +161,16 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
     )
 
     # class weights
-    class_weights = np.ones(num_classes)
+    class_weights = compute_class_weight(
+        class_weight="balanced", classes=np.unique(train_Y_index), y=train_Y_index
+    )
+    class_weights = torch.FloatTensor(class_weights).to(device)
 
     # create the model
     model = SequentialNN(feature_count, num_classes).to(device)
 
     # loss function and optimizer
-    criterion = nn.CrossEntropyLoss().to(device)
+    criterion = nn.CrossEntropyLoss(weight=class_weights).to(device)
     optimizer = optim.Adam(
         model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-08
     )
@@ -176,16 +179,7 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
     train_dataset = TensorDataset(
         torch.FloatTensor(train_X), torch.LongTensor(train_Y_index)
     )
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=batch_size,
-        sampler=WeightedRandomSampler(
-            class_weights,
-            len(class_weights),
-            replacement=True,
-        ),
-        num_workers=20,
-    )
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
     val_dataset = TensorDataset(torch.FloatTensor(val_X), torch.LongTensor(val_Y_index))
     val_loader = DataLoader(val_dataset, batch_size=batch_size)
