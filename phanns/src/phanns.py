@@ -258,7 +258,7 @@ def train():
             group_arr,
             zscore_array,
             model_number,
-            args.gpu,
+            train_args.gpu,
         )
         model_sizes[model_number] = (feature_count, num_classes)
         model_training_scores[model_number] = single_model_training_scores
