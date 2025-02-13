@@ -178,10 +178,11 @@ def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_numb
     )
     train_loader = DataLoader(
         train_dataset,
+        batch_size=batch_size,
         sampler=WeightedRandomSampler(
             class_weights,
-            batch_size,
-            replacement=True,  # class weights might want to be an array of 1s with len(num_classes)
+            len(class_weights),
+            replacement=True,
         ),
         num_workers=20,
     )
