@@ -115,12 +115,14 @@ def load_dataset(fasta_dir):
     )
 
 
-def train_new_pytorch_model(name, class_arr, group_arr, zscore_array, model_number):
+def train_new_pytorch_model(
+    name, class_arr, group_arr, zscore_array, model_number, gpu
+):
     print(f"model {model_number}")
 
     # set up cuda
     assert torch.cuda.is_available()
-    device = torch.device("cuda")
+    device = torch.device(gpu)
 
     # train/val/test split data
     train_X = zscore_array[(group_arr != model_number) & (group_arr != 11)]

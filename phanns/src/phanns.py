@@ -111,6 +111,12 @@ def get_train_args():
         action="store_true",
         help="Boolean flag to force loading zscore calculations from cache if the program terminated early on the previous run. Only use if you're sure the .cache files were written correctly.",
     )
+    parser.add_argument(
+        "--gpu",
+        required=False,
+        default="cuda",
+        help="Name of cuda device (use cuda:1 for second GPU in multi-GPU setup). (default: %(default)s)",
+    )
     args, _ = parser.parse_known_args()
     return args
 
@@ -247,7 +253,12 @@ def train():
             num_classes,
             single_model_training_scores,
         ) = train_custom_model.train_new_pytorch_model(
-            train_args.model_name, class_arr, group_arr, zscore_array, model_number
+            train_args.model_name,
+            class_arr,
+            group_arr,
+            zscore_array,
+            model_number,
+            train_args.gpu,
         )
         model_sizes[model_number] = (feature_count, num_classes)
         model_training_scores[model_number] = single_model_training_scores
