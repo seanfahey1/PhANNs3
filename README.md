@@ -11,7 +11,7 @@ This project is PhANNs 3.1. PhANNs 3.1 is a major revision of the PhANNs Neural 
   - [Using a pre-trained model](#using-a-pre-trained-model)
     - [Pre-conditions](#pre-conditions)
     - [Background information](#background-information)
-    - [Steps to classify a `.fasta` file containing target ORFs](#steps-to-classify-a-fasta-file-containing-target-orfs)
+    - [Steps to classify a fasta-formatted file containing target ORFs](#steps-to-classify-a-fasta-formatted-file-containing-target-orfs)
   - [Training your own model](#training-your-own-model)
     - [Steps to train a model](#steps-to-train-a-model)
 - [Paper](#paper)
@@ -76,7 +76,7 @@ options:
                         Optional relative path of the output csv file. (default: ./output.csv)
 ```
 
-### Steps to classify a `.fasta` file containing target ORFs
+### Steps to classify a fasta-formatted file containing target ORFs
 
 1. Navigate to the directory containing the `phanns.py` file:
    1. `cd phanns/src`
